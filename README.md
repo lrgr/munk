@@ -19,7 +19,7 @@ Mark D.M. Leiserson (1), Jason Fan (1), Anthony Cannistra (2), Inbar Fried (3), 
 In this repo is an implementation of HANDL. 
 
 An example usage of HANDL can be found in `examples/HANDL-homolog-scores` where the HANDL homology scores between proteins in fission (Sp) and baker's (Sc) yeast is computed. 
- You can run the example with `make all`, where the matrix of HANDL homology scores with Sc and Sp as target and source matrices will be computed and saved to disk
+You can run the example with `make all`, where the matrix of HANDL homology scores with Sc and Sp as target and source matrices will be computed and saved to disk.
 
 ---
 
