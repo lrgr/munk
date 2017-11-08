@@ -5,7 +5,6 @@
 *.pyc
 *.pkl
 *.tsv
-*.txt
 *.swp
 *.hdf5
 *.gz
