@@ -51,8 +51,8 @@ Required parameters:
 #### File formats
 Input/Output for the above scripts:
 
-* PPI entwork edge lists should be a 2 column tab separated file where each row is corresponds to an edge in the PPI network. For example, an edgelist might have a row that reads: `GENE_A GENE_B`
-* Homolog lists should be a 2 column tab separatad file where each row corresponds to a pair of homologs between a source and a target species. For example, a Homolog list might have a row that reads: `SOURCE_GENE_A TARGET_GENE_D`
+* A **PPI network edge list** should be a 2 column tab separated file where each row is corresponds to an edge in the PPI network. For example, an edgelist might have a row that reads: `GENE_A GENE_B`
+* A **Homolog lists should** be a 2 column tab separatad file where each row corresponds to a pair of homologs between a source and a target species. For example, a Homolog list might have a row that reads: `SOURCE_GENE_A TARGET_GENE_D`
 
 #### Examples
 An example usage of HANDL can be found in `examples/HANDL-homolog-scores` where the HANDL homology scores between proteins in fission (Sp) and baker's (Sc) yeast is computed.
