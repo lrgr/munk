@@ -2,7 +2,7 @@
 
 ### HANDL
 HANDL is an algorithm for embedding proteins in a target network (e.g. mouse) into a source network (e.g. from human). The HANDL algorithm was developed by Mark Crovella (Boston University), Benjamin Hescott (Northeastern University), and Max Leiserson (University of Maryland, College Park), and their respective research groups.
-
+-----
 ### Setup
 #### Dependencies
 **Required Programs:** GNU Make, wget, Python 2.7.12+, PIP
@@ -20,6 +20,7 @@ You can process the _Sc_ and _Sp_ data with the following commands.
 
 3. **Download and process BioGRID PPI networks.** Run `make all` in `data/ppi/biogrid`.
 
+-----
 ### Usage - Scripts and command-line arguments
 **Compute RKHS factors/factorization of regularized laplacian of PPI networks with:** `factorized_laplacian.py`
 
@@ -58,5 +59,6 @@ Input/Output for the above scripts:
 An example usage of HANDL can be found in `examples/HANDL-homolog-scores` where the HANDL homology scores between proteins in fission (Sp) and baker's (Sc) yeast is computed.
 You can run the example with `make all`, where the matrix of HANDL homology scores with _Sc_ and _Sp_ as target and source matrices will be computed and saved to `/path/to/output/`.
 
+-----
 ### Reference
 Mark D.M. Leiserson, Jason Fan, Anthony Cannistra, Inbar Fried, Tim Lim, Thomas Schaffner, Mark Crovella, and Benjamin Hescott. (2017) "A Multi-Species Functional Embedding Integrating Sequence and Network Structure" (in submission)
