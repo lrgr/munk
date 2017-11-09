@@ -5,7 +5,8 @@ HANDL is an algorithm for embedding proteins in a target network (e.g. mouse) in
 
 ### Setup
 #### Dependencies
-Python, required modules, etc.
+**Required Programs:** GNU Make, wget, Python 2.7.12+, PIP
+**Python Packages:** Install required modules with `pip install -r requirements.txt`
 
 #### Data
 HANDL requires as input a source and target PPI network, and a list of homologs mapping a subset of the nodes in each network. We include scripts for downloading and processing data for _S. cerevisiae_ (_Sc_) and _S. pombe_ (_Sp_) networks and homologs, and mapping them into the same namespace.
@@ -21,7 +22,9 @@ You can process the _Sc_ and _Sp_ data with the following commands.
 ### Usage
 
 #### Scripts and command-line arguments
-What are the main scripts?
+**Computing RKHS factors/factorization of regularized laplacian.** `factorized_laplacian.py`
+
+**Computing HANDL embedding.** `handl_embed.py`
 
 #### File formats
 Input/Output for the above scripts.
