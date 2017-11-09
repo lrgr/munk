@@ -6,6 +6,7 @@ HANDL is an algorithm for embedding proteins in a target network (e.g. mouse) in
 ### Setup
 #### Dependencies
 **Required Programs:** GNU Make, wget, Python 2.7.12+, PIP
+
 **Python Packages:** Install required modules with `pip install -r requirements.txt`
 
 #### Data
@@ -21,17 +22,23 @@ You can process the _Sc_ and _Sp_ data with the following commands.
 
 ### Usage - Scripts and command-line arguments
 **Compute RKHS factors/factorization of regularized laplacian of PPI networks with:** `factorized_laplacian.py`
+
 This script computes and saves the regularized laplacian and factored RKHS embedding of a given PPI network. 
 
+
 Required parameters:
+
 *   `-e`, `--edge_file` : Path to PPI network edge list
 *   `-o`, `-output_file` : Path to where RKHS embedding should be saved
 *   `-df`, `--difusion_file` : Path to where regularized Laplacian should be saved
 *   `-l`, `--lam` : Value of lambda in with respect to the regularized Laplacian
 
 **Compute HANDL embedding of target PPI network with:** `handl_embed.py`
+
 This script computes and saves HANDL homology scoes between a source and target PPI network and the HANDL embedding of the target PPI network, given the RKHS embedding of a source PPI network, the regularized Laplacian (graph kernel) of the target Network, and the list of orthologs (homologs) between the networks.
+
 Note: other values such as the indices corresponding to Landmarks and the Landmarks used are also saved. Also, this script assumes that the given RKHS embeddings and regularized Laplacian is saved in the format outputted by `factorized_laplacian.py`.
+
 
 Required parameters:
 
@@ -43,6 +50,7 @@ Required parameters:
 
 #### File formats
 Input/Output for the above scripts:
+
 * PPI entwork edge lists should be a 2 column tab separated file where each row is corresponds to an edge in the PPI network. For example, an edgelist might have a row that reads: `GENE_A GENE_B`
 * Homolog lists should be a 2 column tab separatad file where each row corresponds to a pair of homologs between a source and a target species. For example, a Homolog list might have a row that reads: `SOURCE_GENE_A TARGET_GENE_D`
 
