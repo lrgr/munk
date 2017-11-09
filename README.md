@@ -50,7 +50,7 @@ Required parameters:
 *   `-n`, `--n_landmarks` : Number of landmarks HANDL should use in the embedding
 
 #### File formats
-Input/Output for the above scripts:
+Inputs for the above scripts:
 
 * A **PPI network edge list** should be a 2 column tab separated file where each row is corresponds to an edge in the PPI network. For example, an edgelist might have a row that reads: `GENE_A GENE_B`
 * A **Homolog lists** should be a 2 column tab separatad file where each row corresponds to a pair of homologs between a source and a target species. For example, a Homolog list might have a row that reads: `SOURCE_GENE_A TARGET_GENE_D`
