@@ -19,15 +19,32 @@ You can process the _Sc_ and _Sp_ data with the following commands.
 
 3. **Download and process BioGRID PPI networks.** Run `make all` in `data/ppi/biogrid`.
 
-### Usage
+### Usage - Scripts and command-line arguments
+**Compute RKHS factors/factorization of regularized laplacian of PPI networks with:** `factorized_laplacian.py`
+This script computes and saves the regularized laplacian and factored RKHS embedding of a given PPI network. 
 
-#### Scripts and command-line arguments
-**Computing RKHS factors/factorization of regularized laplacian.** `factorized_laplacian.py`
+Required parameters:
+*   `-e`, `--edge_file` : Path to PPI network edge list
+*   `-o`, `-output_file` : Path to where RKHS embedding should be saved
+*   `-df`, `--difusion_file` : Path to where regularized Laplacian should be saved
+*   `-l`, `--lam` : Value of lambda in with respect to the regularized Laplacian
 
-**Computing HANDL embedding.** `handl_embed.py`
+**Compute HANDL embedding of target PPI network with:** `handl_embed.py`
+This script computes and saves HANDL homology scoes between a source and target PPI network and the HANDL embedding of the target PPI network, given the RKHS embedding of a source PPI network, the regularized Laplacian (graph kernel) of the target Network, and the list of orthologs (homologs) between the networks.
+Note: other values such as the indices corresponding to Landmarks and the Landmarks used are also saved. Also, this script assumes that the given RKHS embeddings and regularized Laplacian is saved in the format outputted by `factorized_laplacian.py`.
+
+Required parameters:
+
+*   `-s`, `--source_rkhs_file` :  Path to source PPI network RKHS embedding
+*   `-t`, `--target_laplacian_file` : Path to target PPI network regularized Laplacian
+*   `-hf`, `--homologs_file` : List of homologs between source and target
+*   `-o`, `--output_file` : Path to where HANDL embeddings and HANDL homology scores should be saved
+*   `-n`, `--n_landmarks` : Number of landmarks HANDL should use in the embedding
 
 #### File formats
-Input/Output for the above scripts.
+Input/Output for the above scripts:
+* PPI entwork edge lists should be a 2 column tab separated file where each row is corresponds to an edge in the PPI network. For example, an edgelist might have a row that reads: `GENE_A GENE_B`
+* Homolog lists should be a 2 column tab separatad file where each row corresponds to a pair of homologs between a source and a target species. For example, a Homolog list might have a row that reads: `SOURCE_GENE_A TARGET_GENE_D`
 
 #### Examples
 An example usage of HANDL can be found in `examples/HANDL-homolog-scores` where the HANDL homology scores between proteins in fission (Sp) and baker's (Sc) yeast is computed.

@@ -26,7 +26,7 @@ def get_parser():
     parser.add_argument('-e', '--edge_file', type=str, required=True)
     parser.add_argument('-o', '--output_file', type=str, required=True)
     parser.add_argument('-l', '--lam', type=float, default=0.05)
-    parser.add_argument('-df', '--diffusion_file', type=str)
+    parser.add_argument('-df', '--diffusion_file', type=str, required=True)
     return parser
 
 def run(args):
@@ -43,9 +43,8 @@ def run(args):
     logger.info('Computing regularized Laplacian')
     D = regularized_laplacian(L, args.lam)
 
-    if args.diffusion_file:
-        output = dict(params=vars(args), D = D, nodes = nodes)
-        joblib.dump(output, args.diffusion_file)
+    output = dict(params=vars(args), D = D, nodes = nodes)
+    joblib.dump(output, args.diffusion_file)
 
     # extract RKHS vectors
     logger.info('Extracting RKHS features')
