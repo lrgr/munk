@@ -29,7 +29,6 @@ $(SP_C) $(SP_D): $(SP_PPI_EDGELIST) | $(OUTPUT_DIR)
 		-e $(SP_PPI_EDGELIST)\
 		-o $(SP_C) \
 		-df $(SP_D) \
-		-p 1.0 \
 		-l 0.05
 sp-c-d: $(SP_C) $(SP_D)
 
@@ -41,7 +40,6 @@ $(SC_D) $(SC_C): $(SC_PPI_EDGELIST) | $(OUTPUT_DIR)
 		-o $(SC_C)\
 		-df $(SC_D)\
 		-l 0.05 \
-		-p 1.0
 
 sc-c-d: $(SC_D) $(SC_C)
 
@@ -50,8 +48,8 @@ CP_HOMOLOGS = $(DATA_DIR)/homologs/sc-sp/sc-sp-homologs.txt
 
 $(SP_C_HAT): $(SP_D) $(SC_C) $(CP_HOMOLOGS) | $(OUTPUT_DIR)
 	python $(EMBED)\
-		-sv $(SC_C)\
-		-df $(SP_D)\
+		-s $(SC_C)\
+		-t $(SP_D)\
 		-hf $(CP_HOMOLOGS)\
 		-o $(SP_C_HAT)
 
@@ -62,8 +60,8 @@ PC_HOMOLOGS = $(DATA_DIR)/homologs/sc-sp/sp-sc-homologs.txt
 
 $(SC_C_HAT): $(SC_D) $(SP_C) $(PC_HOMOLOGS) | $(OUTPUT_DIR)
 	python $(EMBED)\
-		-sv $(SP_C)\
-		-df $(SC_D)\
+		-s $(SP_C)\
+		-t $(SC_D)\
 		-hf $(PC_HOMOLOGS)\
 		-o $(SC_C_HAT)
 

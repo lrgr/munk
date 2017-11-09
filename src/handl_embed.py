@@ -1,6 +1,4 @@
-#!/usr/bin/env Python
-
-# Load required modules
+#!/usr/bin/env Python 
 
 import argparse
 import os
@@ -14,105 +12,75 @@ from sklearn.externals import joblib
 
 import logging_utils
 
-def announce(message):
-    print time.strftime('%H:%M:%S'),message
-    sys.stdout.flush()
-
-##########################################################################
-# MAIN
-##########################################################################
-# Command-line argument parser
-
-
 def get_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-sv', '--static_vector_file', type=str, required=True)
-    parser.add_argument('-df', '--diffusion_file', type=str, required=True)
+    parser.add_argument('-s', '--source_rkhs_file', type=str, required=True)
+    parser.add_argument('-t', '--target_laplacian_file', type=str, required=True)
     parser.add_argument('-hf', '--homologs_file', type=str, required=True)
     parser.add_argument('-o', '--output_file', type=str, required=True)
     parser.add_argument('-n', '--n_landmarks', type=int, required=False, default=400)
     return parser
 
-# for use in development 
-def setup_args(sv='output/features/biogrid-sc-ppi-findr.pkl',
-               df='output/features/biogrid-sp-diffusion.pkl',
-               h = '../../data/homologs/sc-sp/sc-sp-homologs.txt',
-               o = 'output/features/biogrid-sp-ppi-aligned.pkl'
-               ):
-    args = argparse.Namespace()
-    args.static_vector_file = sv
-    args.diffusion_file = df
-    args.homologs_file = h
-    args.output_file = o
-    return args
-
 def run(args):
     logger = logging_utils.getLogger()
 
-    # read in static vector file and its nodelist
-    data = joblib.load(args.static_vector_file)
-    static_X = data['X']
-    static_nodes = data['nodes']
+    # read in source and target matrices
+    data = joblib.load(args.source_rkhs_file)
+    source_C = data['X']
+    source_nodes = data['nodes']
     
-    data = joblib.load(args.diffusion_file)
-    aligned_nodes = data['nodes']
-    alignment_metric = data['D']
+    data = joblib.load(args.target_laplacian_file)
+    target_nodes = data['nodes']
+    target_D = data['D']
 
     # read in homologs
-    # assume the order is static node - aligned node
-    # this means sc - sp
-    static_homs = []
-    aligned_homs = []
+    # assume the order is source node - target node
+    source_homs = []
+    target_homs = []
     with open(args.homologs_file, 'r') as hom_f:
-        line = hom_f.readline()
-        while line:
-            static_hom, aligned_hom = line.split()
-            if (static_hom in static_nodes) and (aligned_hom in aligned_nodes):
-                static_homs.append(static_hom)
-                aligned_homs.append(aligned_hom)
-            line = hom_f.readline()
+        for line in hom_f:
+            source_hom, target_hom = line.split()
+            if (source_hom in source_nodes) and (target_hom in target_nodes):
+                source_homs.append(source_hom)
+                target_homs.append(target_hom)
 
-    n_homologs = args.n_landmarks
+    n_landmarks = args.n_landmarks
 
-    # because we are using only a fraction of the findr feature vectors
-    # we want to make sure we havent used more landmarks than feature dimension
-    assert(n_homologs < static_X.shape[1])
+    # Sanity check for number of landmarks
+    assert(n_landmarks <= len(source_homs))
    
-    static_indices = [static_nodes.index(node) for node in static_homs]
-    aligned_indices = [aligned_nodes.index(node) for node in aligned_homs]
-    static_landmark_homs = static_homs[:n_homologs]
-    aligned_landmark_homs = aligned_homs[:n_homologs]
+    source_homolog_indices = [source_nodes.index(node) for node in source_homs]
+    target_homolog_indices = [target_nodes.index(node) for node in target_homs]
+    source_landmarks = source_homs[:n_landmarks]
+    target_landmarks = target_homs[:n_landmarks]
 
-    static_landmark_indices = static_indices[:n_homologs]
-    static_non_landmark_hom_indices = static_indices[n_homologs:]
-    aligned_landmark_indices = aligned_indices[:n_homologs]
-    aligned_non_landmark_hom_indices = aligned_indices[n_homologs:]
+    source_landmark_indices = source_homolog_indices[:n_landmarks]
+    source_non_landmark_indices = source_homolog_indices[n_landmarks:]
+    target_landmark_indices = target_homolog_indices[:n_landmarks]
+    target_non_landmark_indices = target_homolog_indices[n_landmarks:]
 
     # select corresponding rows in each vector set and regress
-    aligned_X = np.linalg.pinv(static_X[static_landmark_indices,:]).dot(
-        alignment_metric[aligned_landmark_indices,:])
+    target_handl_C = np.linalg.pinv(source_C[source_landmark_indices,:]).dot(
+        target_D[target_landmark_indices,:])
 
-    # use aligned_X.T
-    data = dict(aligned_X = aligned_X.T, 
-                static_X = static_X,
-                D = static_X.dot(aligned_X), 
-                nodes = aligned_nodes, 
-                static_nodes = static_nodes,
-                aligned_landmark_homs = aligned_landmark_homs,
-                aligned_landmark_indices=aligned_landmark_indices,
-                aligned_non_landmark_homs_indices = aligned_non_landmark_hom_indices,
-                static_landmark_homs = static_landmark_homs,
-                static_landmark_indices=static_landmark_indices,
-                static_non_landmark_homs_indices = static_non_landmark_hom_indices)
+    data = dict(target_handl_C = target_handl_C.T, 
+                source_C = source_C,
+                D = source_C.dot(target_handl_C), 
+                target_nodes = target_nodes, 
+                source_nodes = source_nodes,
+                target_landmarks = target_landmarks,
+                target_landmark_indices = target_landmark_indices,
+                target_non_landmark_indices = target_non_landmark_indices,
+                source_landmarks = source_landmarks,
+                source_landmark_indices=source_landmark_indices,
+                source_non_landmark_indices = source_non_landmark_indices)
     joblib.dump(data, args.output_file)
 
 
-    logger.info('Num homologs used for alignment: %d', n_homologs)
-    logger.info('Pre-alignment shape: %s', str(static_X.shape))
-    logger.info('Post-alignment shape: %s', str(aligned_X.T.shape))
-    logger.info('Num aligned nodes: %d', len(aligned_nodes))
-    logger.info('alignment metric shape: %s', str(alignment_metric.shape))
-
+    logger.info('Num landmarks used for embedding: %d', n_landmarks)
+    logger.info('Source embedding  shape: %s', str(source_C.shape))
+    logger.info('Pre-embedding target shape: %s', str(target_D.shape))
+    logger.info('Post-embedding targets hape: %s', str(target_handl_C.T.shape))
 
 
 if __name__ == '__main__':
