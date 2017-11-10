@@ -40,6 +40,7 @@ Outputs:
 The regularized Laplacian is saved to a Python dictionary with the following keys and values:
 * `D` :  A NumPy array containing the values of the regularized Laplacian
 * `nodes`: List of nodes/gene names corresponding to the rows and columns of the regularized Laplacian
+
 The RKHS embedding is saved to a Python dictionary with the following keys and values:
 * `X` :  A NumPy array containing the values of the RKHS embedding
 * `nodes`: List of nodes/gene names corresponding to the rows and columns of the RKHS embedding
