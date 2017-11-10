@@ -24,9 +24,9 @@ You can process the _Sc_ and _Sp_ data with the following commands.
 
 -----
 ### Usage - Scripts and command-line arguments
-**Compute RKHS factors/factorization of regularized laplacian of PPI networks with:** `factorized_laplacian.py`
+**Compute RKHS factors/factorization of regularized Laplacian of PPI networks with:** `factorized_laplacian.py`
 
-This script computes and saves the regularized laplacian and factored RKHS embedding of a given PPI network. 
+This script computes and saves the regularized Laplacian and factored RKHS embedding of a given PPI network. 
 
 
 Required parameters:
@@ -36,9 +36,17 @@ Required parameters:
 *   `-df`, `--difusion_file` : Path to where regularized Laplacian should be saved
 *   `-l`, `--lam` : Value of lambda in with respect to the regularized Laplacian
 
+Outputs:
+The regularized Laplacian is saved to a Python dictionary with the following keys and values:
+* `D` :  A NumPy array containing the values of the regularized Laplacian
+* `nodes`: List of nodes/gene names corresponding to the rows and columns of the regularized Laplacian
+The RKHS embedding is saved to a Python dictionary with the following keys and values:
+* `X` :  A NumPy array containing the values of the RKHS embedding
+* `nodes`: List of nodes/gene names corresponding to the rows and columns of the RKHS embedding
+
 **Compute HANDL embedding of target PPI network with:** `handl_embed.py`
 
-This script computes and saves HANDL homology scoes between a source and target PPI network and the HANDL embedding of the target PPI network, given the RKHS embedding of a source PPI network, the regularized Laplacian (graph kernel) of the target Network, and the list of orthologs (homologs) between the networks.
+This script computes and saves HANDL homology scores between a source and target PPI network and the HANDL embedding of the target PPI network, given the RKHS embedding of a source PPI network, the regularized Laplacian (graph kernel) of the target Network, and the list of orthologs (homologs) between the networks.
 
 Note: other values such as the indices corresponding to Landmarks and the Landmarks used are also saved. Also, this script assumes that the given RKHS embeddings and regularized Laplacian is saved in the format outputted by `factorized_laplacian.py`.
 
@@ -51,11 +59,30 @@ Required parameters:
 *   `-o`, `--output_file` : Path to where HANDL embeddings and HANDL homology scores should be saved
 *   `-n`, `--n_landmarks` : Number of landmarks HANDL should use in the embedding
 
-#### File formats
-Inputs for the above scripts:
+Output:
+The HANDL embedding is saved to a Python dictionary with the following keys and values:
+*   `D` : A NumPy array containing the HANDL homology scores
+*   `target_handl_C`: A NumPy array containing the values for the HANDL embedding of the target PPI network
+*   `source_C`: A NumPy array containing the values for the RKHS embedding of the source PPI network
+*   `target_nodes` : List of node/gene names corresponding to the rows and columns with respect to the target network and the saved matrices of embeddings/scores
+*   `source_nodes` : List of node/gene names corresponding to the rows and columns with respect to the target network and the saved matrices of embeddings/scores
+*   `target_landmarks` : List of node/gene names from the target used as landmarks 
+*   `source_landmarks` : List of node/gene names from the source used as landmarks
+*   `target_landmark_indices` : Indices of the rows of the HANDL embedding that corresponds to landmarks
+*   `source_landmark_indices` : Indices of the rows of the source RKHS embedding that correspond to landmarks
+*   `target_non_landmark_indices` : Indices of the rows of the HANDL embedding that corresponds to genes not used as landmarks
+*   `source_non_landmark_indices` : Indices of the rows of the source RKHS embedding that correspond to genes not used as landmarks
 
-* A **PPI network edge list** should be a 2 column tab separated file where each row is corresponds to an edge in the PPI network. For example, an edgelist might have a row that reads: `GENE_A GENE_B`
-* A **Homolog lists** should be a 2 column tab separatad file where each row corresponds to a pair of homologs between a source and a target species. For example, a Homolog list might have a row that reads: `SOURCE_GENE_A TARGET_GENE_D`
+#### File formats
+**Inputs for the scripts above:**
+
+*   A **PPI network edge list** should be a 2 column tab separated file where each row is corresponds to an edge in the PPI network. For example, an edgelist might have a row that reads: `GENE_A GENE_B`
+*   A **Homolog list** should be a 2 column tab separated file where each row corresponds to a pair of homologs between a source and a target species. For example, a Homolog list might have a row that reads: `SOURCE_GENE_A TARGET_GENE_D`
+
+**Outputs for the scripts above:**
+The Python dictionaries saved by the scripts above are saved/serialized using SciKit-Learn's JobLib module.
+
+
 
 #### Examples
 An example usage of HANDL can be found in `examples/HANDL-homolog-scores` where the HANDL homology scores between proteins in fission (Sp) and baker's (Sc) yeast is computed.
