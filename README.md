@@ -87,7 +87,8 @@ The Python dictionaries saved by the scripts above are saved/serialized using Sc
 
 #### Examples
 An example usage of HANDL can be found in `examples/HANDL-homolog-scores` where the HANDL homology scores between proteins in fission (Sp) and baker's (Sc) yeast is computed.
-You can run the example with `make all`, where the matrix of HANDL homology scores with _Sc_ and _Sp_ as target and source matrices will be computed and saved to `/path/to/output/`.
+You can run the example with `make all`, where the matrix of HANDL homology scores and HANDL embeddings with _Sc_ as the source and _Sp_ as the target will be computed and saved to `examples/HANDL-homolog-scores/output/sp-to-sc-scores-and-matrices.pkl`. Aslo, the matrix of HANDL homology scores and HANDL embeddings with _Sp_ as the source and _Sc_ as the target will be computed and saved to `examples/HANDL-homolog-scores/output/sc-to-sp-scores-and-matrices.pkl`. 
+The RKHS and regularized Laplacians used for HANDL embeddings are saved to `examples/HANDL-homolog-scores/output/feats`.
 
 -----
 ### Reference
