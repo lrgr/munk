@@ -7,7 +7,7 @@ HANDL is an algorithm for embedding proteins in a target network (e.g. mouse) in
 
 ### Setup
 #### Dependencies
-**Required Programs:** GNU Make, wget, Python 2.7.12+, PIP
+**Required Programs:** GNU Make, wget, Python 3.4.2+, PIP
 
 **Python Packages:** Install required modules with `pip install -r requirements.txt`
 
