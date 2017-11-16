@@ -33,7 +33,7 @@ Required parameters:
 
 *   `-e`, `--edge_file` : Path to PPI network edge list
 *   `-o`, `-output_file` : Path to where RKHS embedding should be saved
-*   `-df`, `--difusion_file` : Path to where regularized Laplacian should be saved
+*   `-df`, `--diffusion_file` : Path to where regularized Laplacian should be saved
 *   `-l`, `--lam` : Value of lambda in with respect to the regularized Laplacian
 
 Outputs:
@@ -71,8 +71,8 @@ The HANDL embedding is saved to a Python dictionary with the following keys and 
 *   `source_landmarks` : List of node/gene names from the source used as landmarks
 *   `target_landmark_indices` : Indices of the rows of the HANDL embedding that corresponds to landmarks
 *   `source_landmark_indices` : Indices of the rows of the source RKHS embedding that correspond to landmarks
-*   `target_non_landmark_indices` : Indices of the rows of the HANDL embedding that corresponds to genes not used as landmarks
-*   `source_non_landmark_indices` : Indices of the rows of the source RKHS embedding that correspond to genes not used as landmarks
+*   `target_non_landmark_indices` : Indices of the rows of the HANDL embedding that correspond to homologs not used as landmarks
+*   `source_non_landmark_indices` : Indices of the rows of the source RKHS embedding that correspond to homologs not used as landmarks
 
 #### File formats
 **Inputs for the scripts above:**
@@ -86,12 +86,12 @@ The Python dictionaries saved by the scripts above are saved/serialized using Sc
 
 
 #### Examples
-An example usage of HANDL can be found in `examples/HANDL-homolog-scores` where the HANDL homology scores between proteins in fission (Sp) and baker's (Sc) yeast is computed.
+An example usage of HANDL can be found in `example/HANDL-homolog-scores` where the HANDL homology scores between proteins in fission (Sp) and baker's (Sc) yeast is computed.
 You can run the example with `make all`, where:
 
-*	The matrix of HANDL homology scores and HANDL embeddings with _Sc_ as the source and _Sp_ as the target will be computed and saved to `examples/HANDL-homolog-scores/output/sp-to-sc-scores-and-matrices.pkl`
-*	The matrix of HANDL homology scores and HANDL embeddings with _Sp_ as the source and _Sc_ as the target will be computed and saved to `examples/HANDL-homolog-scores/output/sc-to-sp-scores-and-matrices.pkl`
-*	The RKHS and regularized Laplacians used for HANDL embeddings are saved to `examples/HANDL-homolog-scores/output/feats`.
+*	The matrix of HANDL homology scores and HANDL embeddings with _Sc_ as the source and _Sp_ as the target will be computed and saved to `example/HANDL-homolog-scores/output/sp-to-sc-scores-and-matrices.pkl`
+*	The matrix of HANDL homology scores and HANDL embeddings with _Sp_ as the source and _Sc_ as the target will be computed and saved to `example/HANDL-homolog-scores/output/sc-to-sp-scores-and-matrices.pkl`
+*	The RKHS and regularized Laplacians used for HANDL embeddings are saved to `example/HANDL-homolog-scores/output/feats`.
 
 -----
 ### Reference
