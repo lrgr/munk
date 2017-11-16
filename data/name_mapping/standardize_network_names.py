@@ -24,7 +24,7 @@ def get_parser():
     return parser
 
 def announce(message):
-    print time.strftime('%H:%M:%S'),message
+    print(time.strftime('%H:%M:%S'),message)
     sys.stdout.flush()
 
 def map_file(input_file, output_file, err_file, map_name):
