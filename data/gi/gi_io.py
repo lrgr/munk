@@ -7,7 +7,7 @@ from collections import defaultdict
 SL_NAME = "SL"
 NON_SL_NAME = "Non-SL"
 UNKNOWN_NAME = "Inconclusive"
-nameToIndex = dict(zip([NON_SL_NAME, SL_NAME, UNKNOWN_NAME], range(3)))
+nameToIndex = dict(list(zip([NON_SL_NAME, SL_NAME, UNKNOWN_NAME], list(range(3)))))
 
 # Classify a gene as SL or not
 def classify_gi(score, sl_threshold, uncertainty_threshold, pval, pval_threshold):
@@ -27,7 +27,7 @@ def classify_gi(score, sl_threshold, uncertainty_threshold, pval, pval_threshold
 def construct_gi_dataframe(pairToScore, sl_threshold, uncertainty_threshold, pairToPval=defaultdict(int), pval_threshold=1):
     import pandas as pd
     items = []
-    for pair, score in pairToScore.iteritems():
+    for pair, score in pairToScore.items():
         geneA, geneB = sorted(pair)
         items.append({
             "Gene A": geneA,
@@ -49,7 +49,7 @@ def output_gi_dataframe(df, output_prefix, output_format):
         # Create Numpy-style data
         genes = sorted(set(df['Gene A']) | set(df['Gene B']))
         n_genes = len(genes)
-        geneToIndex = dict(zip(genes, range(n_genes)))
+        geneToIndex = dict(list(zip(genes, list(range(n_genes)))))
 
         A = [ [geneToIndex[r['Gene A']], geneToIndex[r['Gene B']], r['Score'], nameToIndex[r['Category']]]
               for i, r in df.iterrows() ]
