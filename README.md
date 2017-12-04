@@ -7,9 +7,11 @@ HANDL is an algorithm for embedding proteins in a target network (e.g. mouse) in
 
 ### Setup
 #### Dependencies
-**Required Programs:** GNU Make, wget, Python 3.4.2+, PIP
+**Required Programs:** GNU Make, wget, Python 3.4.2+, PIP, conda
 
-**Python Packages:** Install required modules with `pip install -r requirements.txt`
+**Python Packages:** Install required modules with `conda env create -f environment.yml`
+
+**Conda Environment:** Run `source activate HANDL` to work in `HANDL` conda environment
 
 #### Data
 HANDL requires as input a source and target PPI network, and a list of homologs mapping a subset of the nodes in each network. We include scripts for downloading and processing data for _S. cerevisiae_ (_Sc_) and _S. pombe_ (_Sp_) networks and homologs, and mapping them into the same namespace.
@@ -87,7 +89,7 @@ The Python dictionaries saved by the scripts above are saved/serialized using Sc
 
 #### Examples
 An example usage of HANDL can be found in `example/HANDL-homolog-scores` where the HANDL homology scores between proteins in fission (Sp) and baker's (Sc) yeast is computed.
-You can run the example with `make all`, where:
+You can run the example with `snakemake`, where:
 
 *	The matrix of HANDL homology scores and HANDL embeddings with _Sc_ as the source and _Sp_ as the target will be computed and saved to `example/HANDL-homolog-scores/output/sp-to-sc-scores-and-matrices.pkl`
 *	The matrix of HANDL homology scores and HANDL embeddings with _Sp_ as the source and _Sc_ as the target will be computed and saved to `example/HANDL-homolog-scores/output/sc-to-sp-scores-and-matrices.pkl`
