@@ -7,7 +7,7 @@ HANDL is an algorithm for embedding proteins in a target network (e.g. mouse) in
 
 ### Setup
 #### Dependencies
-**Required Programs:** GNU Make, wget, Python 3.4.2+, PIP, conda
+**Required Programs:** GNU Make, wget, Python 3, PIP, conda
 
 **Python Packages:** Install required modules with `conda env create -f environment.yml`
 
