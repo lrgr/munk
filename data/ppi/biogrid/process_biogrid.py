@@ -22,9 +22,9 @@ with open(args.input_file, 'r') as IN:
 # Find the largest connected component
 ccs = sorted(list(nx.connected_components(G)), key=lambda cc: len(cc), reverse=True)
 H = G.subgraph(ccs[0])
-print '* Loaded graph with %s connected components...' % len(ccs)
-print '\t- %s nodes (%s in largest CC)' % (G.number_of_nodes(), H.number_of_nodes())
-print '\t- %s edges (%s in largest CC)' % (G.number_of_edges(), H.number_of_edges())
+print('* Loaded graph with %s connected components...' % len(ccs))
+print('\t- %s nodes (%s in largest CC)' % (G.number_of_nodes(), H.number_of_nodes()))
+print('\t- %s edges (%s in largest CC)' % (G.number_of_edges(), H.number_of_edges()))
 
 # Output to file
 nx.write_edgelist(G, args.output_file, data=True, delimiter='\t')

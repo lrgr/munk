@@ -33,17 +33,14 @@ class Uniprot_Mapper:
             
             for uniprot_db_file in file_names:
                 with gzip.open(uniprot_db_file,'r') as in_f:
-                    
-                    line = in_f.readline()
-                    while line:
-                        (uniprot_ref, identifier, value) = line.rstrip().split('\t')
+                    for line in in_f:
+                        (uniprot_ref, identifier, value) = line.decode('utf-8').rstrip().split('\t')
                         if identifier == 'RefSeq':
                             self.refseq_map[value] = uniprot_ref
                         elif identifier == 'Gene_OrderedLocusName':
                             self.gene_ordered_locus_map[value] = uniprot_ref
                         elif identifier == 'EnsemblGenome':
                             self.ensembl_map[value] = uniprot_ref
-                        line = in_f.readline()
 
     # dont want to use exceptions for signaling here
     # because they are slow and will be raised a lot

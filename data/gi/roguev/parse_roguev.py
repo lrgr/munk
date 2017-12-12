@@ -38,8 +38,8 @@ with open(args.input_file, 'r') as IN:
             else:
                 pairToScore[pair] = score
 
-print '* Loaded %s interactions...' % len(pairToScore)
-print '\t- Found %s discrepancies (pairs measured twice that were not the same)' % n_discrepancies
+print('* Loaded %s interactions...' % len(pairToScore))
+print('\t- Found %s discrepancies (pairs measured twice that were not the same)' % n_discrepancies)
                 
 # Construct a dataframe and output to file
 df = construct_gi_dataframe(pairToScore, args.sl_threshold, args.uncertainty_threshold)

@@ -1,0 +1,55 @@
+#Snakefile
+
+# Directories for outputs
+RKHS_DIR = 'output/feats'
+OUTPUT_DIR = 'output'
+
+# Python scripts
+SRC_DIR = '../../src'
+FACTOR = SRC_DIR + '/factorized_laplacian.py'
+EMBED =  SRC_DIR + '/handl_embed.py'
+
+# Inputs
+DATA_DIR = '../../data'
+
+rule all:
+    input:
+        OUTPUT_DIR + '/sc-sp-chat.pkl',
+        OUTPUT_DIR + '/sp-sc-chat.pkl',
+    log: OUTPUT_DIR + '/log.txt'
+
+# Rule to compute regularized laplacian and corresponding RKHS vectors
+#
+PPI_EDGELIST = DATA_DIR + '/ppi/biogrid/{species}/biogrid-{species}-std-network.txt'
+rule compute_rkhs:
+    input:
+        PPI_EDGELIST
+    output:
+        c = RKHS_DIR + '/{species}-c.pkl',
+        d = RKHS_DIR + '/{species}-d.pkl'
+
+    log: OUTPUT_DIR + '/log.txt'
+    shell:
+        'python {FACTOR} -e {input} -o {output.c} -df {output.d} -l 0.05'
+
+HOMOLOG_LIST = DATA_DIR + '/homologs/sc-sp/{source}-{target}-homologs.txt'
+
+rule handl_embed:
+    input:
+        homologs = HOMOLOG_LIST,
+        source_c = RKHS_DIR+ '/{source}-c.pkl',
+        target_d = RKHS_DIR + '/{target}-d.pkl',
+    output:
+        OUTPUT_DIR + '/{target}-{source}-chat.pkl'
+    log: OUTPUT_DIR + '/log.txt'
+    shell:
+        'python {EMBED} -s {input.source_c} -t {input.target_d} ' \
+            '-hf {input.homologs} -o {output}'
+        
+
+# Rule for clean up
+rule clean:
+    input:
+        OUTPUT_DIR
+    shell:
+        'rm -r {input}'
