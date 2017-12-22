@@ -1,4 +1,9 @@
+# bottom line: cant seem to use ftp with binder
+# first line below requires it; if we can do a workaround then
+# binder should work
+#
 # (cd data/name_mapping; make all)
+wget http://www.cs.bu.edu/faculty/crovella/sc-sp-idmapping.json -O data/name_mapping/mappings/sc-sp-idmapping.json
 (cd data/homologs; make all)
 (cd data/ppi/biogrid; make all)
 
