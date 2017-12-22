@@ -6,6 +6,14 @@
 mkdir data/name_mapping  
 mkdir data/name_mapping/mappings
 wget http://www.cs.bu.edu/faculty/crovella/sc-sp-idmapping.json -O data/name_mapping/mappings/sc-sp-idmapping.json
+#
 (cd data/homologs; make all)
-(cd data/ppi/biogrid; make all)
-
+#
+# this fails due to some weird error with unzip
+# (cd data/ppi/biogrid; make all)
+mkdir data/ppi
+mkdir data/ppi/biogrid
+mkdir data/ppi/biogrid/sc
+mkdir data/ppi/biogrid/sp
+wget http://www.cs.bu.edu/faculty/crovella/biogrid-sc-std-network.txt -O data/ppi/biogrid/sc
+wget http://www.cs.bu.edu/faculty/crovella/biogrid-sp-std-network.txt -O data/ppi/biogrid/sp
