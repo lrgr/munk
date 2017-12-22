@@ -48,7 +48,6 @@ $(SC_SP_HOMOLOGS): $(HOMOLOGENE_RAW)
 		-uf $(IDMAPPING)
 
 $(SP_SC_HOMOLOGS): $(SC_SP_HOMOLOGS)
-	sed 's/ /\t/g' $(SC_SP_HOMOLOGS) > sc-sp/tmp.txt
+	sed 's/ /	/g' $(SC_SP_HOMOLOGS) > sc-sp/tmp.txt
 	python swap_cols.py sc-sp/tmp.txt  $@
 	rm sc-sp/tmp.txt
-	
