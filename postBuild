@@ -3,7 +3,9 @@
 # binder should work
 #
 # (cd data/name_mapping; make all)
+mkdir data/name_mapping  
+mkdir data/name_mapping/mappings
 wget http://www.cs.bu.edu/faculty/crovella/sc-sp-idmapping.json -O data/name_mapping/mappings/sc-sp-idmapping.json
-# (cd data/homologs; make all)
-# (cd data/ppi/biogrid; make all)
+(cd data/homologs; make all)
+(cd data/ppi/biogrid; make all)
 
