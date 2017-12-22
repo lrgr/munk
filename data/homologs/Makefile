@@ -3,7 +3,7 @@ RAW_DIR=raw
 SC_SP_DIR=sc-sp
 
 # Input files
-HOMOLOGENE_RAW_URL=ftp://ftp.ncbi.nih.gov/pub/HomoloGene/build68/homologene.xml.gz
+HOMOLOGENE_RAW_URL=http://ftp.ncbi.nih.gov/pub/HomoloGene/build68/homologene.xml.gz
 HOMOLOGENE_RAW=$(RAW_DIR)/homologene.xml.gz
 
 # Output files

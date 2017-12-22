@@ -1,4 +1,4 @@
 # (cd data/name_mapping; make all)
-# (cd data/homologs; make all)
-# (cd data/ppi/biogrid; make all)
-# wget http://www.cs.bu.edu/faculty/crovella
+(cd data/homologs; make all)
+(cd data/ppi/biogrid; make all)
+
