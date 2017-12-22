@@ -15,5 +15,5 @@ mkdir data/ppi
 mkdir data/ppi/biogrid
 mkdir data/ppi/biogrid/sc
 mkdir data/ppi/biogrid/sp
-wget http://www.cs.bu.edu/faculty/crovella/biogrid-sc-std-network.txt -O data/ppi/biogrid/sc
-wget http://www.cs.bu.edu/faculty/crovella/biogrid-sp-std-network.txt -O data/ppi/biogrid/sp
+wget http://www.cs.bu.edu/faculty/crovella/biogrid-sc-std-network.txt -O data/ppi/biogrid/sc/biogrid-sc-std-network.txt
+wget http://www.cs.bu.edu/faculty/crovella/biogrid-sp-std-network.txt -O data/ppi/biogrid/sp/biogrid-sp-std-network.txt
