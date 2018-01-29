@@ -27,7 +27,7 @@ def simplify_graph(G):
         logger.warning('\tUsing largest connected component')
 
         G = max(cc_list, key=len)
-    G.remove_edges_from(G.selfloop_edges())
+    G.remove_edges_from(list(G.selfloop_edges()))
     return G
 
 
