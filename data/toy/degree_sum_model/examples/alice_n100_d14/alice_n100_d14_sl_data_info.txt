@@ -1,0 +1,6 @@
+SL_ratio: 0.4206060606060606
+median_degree: 6.0
+n_GI_labels: 4950
+n_SLs: 2082
+n_nodes: 100
+sl_threshhold: 14

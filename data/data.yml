@@ -1,0 +1,39 @@
+# Gi files for S.c and S.p
+gi/collins/sc/collins-sc-emap-gis-std.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/collins/sc/collins-sc-emap-gis-std.tsv
+gi/collins/sc/collins-sc-emap-gis.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/collins/sc/collins-sc-emap-gis.tsv
+gi/roguev/sp/roguev-sp-emap-gis-std.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/roguev/sp/roguev-sp-emap-gis-std.tsv
+gi/roguev/sp/roguev-sp-emap-gis.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/roguev/sp/roguev-sp-emap-gis.tsv
+
+# HOMOLOG LISTS
+homologs/sc-sp/sc-sp-homologs.txt: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/homologs/sc-sp/sc-sp-homologs.txt
+homologs/sc-sp/sp-sc-homologs.txt: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/homologs/sc-sp/sp-sc-homologs.txt
+
+# BIOGRID PPIS
+ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi-std.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi-std.tsv
+ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi.tsv
+ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi-std.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi-std.tsv
+ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi.tsv
+
+# Toy data:
+toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_ppi_edgelist.tsv: |
+        https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_ppi_edgelist.tsv
+toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_sl_data.tsv: |
+        https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_sl_data.tsv
+toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_sl_data_info.txt: |
+        https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_sl_data_info.txt
+toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_ppi_edgelist.tsv: |
+        https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_ppi_edgelist.tsv
+toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data.tsv: |
+        https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data.tsv
+toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data_info.txt: |
+        https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data_info.txt
