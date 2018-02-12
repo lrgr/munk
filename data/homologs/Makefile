@@ -3,7 +3,7 @@ RAW_DIR=raw
 SC_SP_DIR=sc-sp
 
 # Input files
-HOMOLOGENE_RAW_URL=ftp://ftp.ncbi.nih.gov/pub/HomoloGene/build68/homologene.xml.gz
+HOMOLOGENE_RAW_URL=http://ftp.ncbi.nih.gov/pub/HomoloGene/build68/homologene.xml.gz
 HOMOLOGENE_RAW=$(RAW_DIR)/homologene.xml.gz
 
 # Output files
@@ -48,7 +48,6 @@ $(SC_SP_HOMOLOGS): $(HOMOLOGENE_RAW)
 		-uf $(IDMAPPING)
 
 $(SP_SC_HOMOLOGS): $(SC_SP_HOMOLOGS)
-	sed 's/ /\t/g' $(SC_SP_HOMOLOGS) > sc-sp/tmp.txt
+	sed 's/ /	/g' $(SC_SP_HOMOLOGS) > sc-sp/tmp.txt
 	python swap_cols.py sc-sp/tmp.txt  $@
 	rm sc-sp/tmp.txt
-	

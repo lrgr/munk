@@ -14,3 +14,4 @@ dependencies:
   - pandas=0.*
   - matplotlib=2.*
   - snakemake=4.*
+  - unzip
