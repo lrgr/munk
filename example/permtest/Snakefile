@@ -1,0 +1,21 @@
+rule all:
+    input:
+        '../../data/toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_ppi_edgelist.tsv'
+    params:
+        n_graphs = 100,
+        output_dir = 'output/alice',
+        species_name = 'alice',
+        n_jobs = 4,
+    output:
+        'output/alice/alice_networks.tsv'
+    shell:
+        """
+        time \
+        python ../../src/gen_random_networks.py \
+            -s {params.species_name} \
+            -e {input} \
+            -n {params.n_graphs} \
+            -d {params.output_dir} \
+            -j {params.n_jobs} \
+            | tee log.txt
+        """
