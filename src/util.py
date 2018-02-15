@@ -1,20 +1,28 @@
 #!/usr/bin/env python
 
 # Load required modules
-import numpy as np
+import sys, os, numpy as np
+
 import networkx as nx 
 import pandas as pd
+from sklearn import metrics
+from sklearn.externals import joblib
 
-from logging_utils import getLogger
+from i_o import get_logger
 
 # Vector operations
+def abs_diff(u, v): return np.abs(u-v)
+def mean(u, v): return np.mean([u, v], axis=0)
+
+def first(u, v): return u
+def second(u, v): return v
 
 def simplify_graph(G):
     ''' 
     Returns the simple/strict graph corresponding to given graph
     (Removes self loops from G and returns largest connected component)
     '''
-    logger = getLogger()
+    logger = get_logger()
     if (not nx.is_connected(G)):
         cc_list = list(nx.connected_component_subgraphs(G))
         cc_sizes = [len(x) for x in cc_list]
@@ -27,14 +35,13 @@ def simplify_graph(G):
         logger.warning('\tUsing largest connected component')
 
         G = max(cc_list, key=len)
-    G.remove_edges_from(list(G.selfloop_edges()))
+    G.remove_edges_from(G.selfloop_edges())
     return G
 
-
 def simple_two_core(G):
-    ''' Returns simplified, 2 cored of given graph '''
+    ''' Returns simple, 2 core of given graph '''
 
-    logger = getLogger()
+    logger = get_logger()
 
     # Get simple graph
     G = simplify_graph(G)
@@ -70,6 +77,11 @@ def binarized_graphs_from_tsv(fp):
 
     return SLs, non_SLs
 
+def read_homolog_list(fp):
+    ''' Returns tuple of homologs from two column homolgs tsv file '''
+    with open(fp, 'r') as f:
+        return [l.split() for l in f]
+
 def graph_from_tsv(fp):
     # load tsv
     df = pd.DataFrame.from_csv(fp, sep='\t', header=0, index_col=None)
@@ -77,3 +89,35 @@ def graph_from_tsv(fp):
     G = nx.Graph()
     G.add_weighted_edges_from(df.values[:, :3])
     return G
+
+def max_f1(y_true, y_pred):
+    ps, rs, _ = metrics.precision_recall_curve(y_true, y_pred)
+
+    f1s = np.asarray([ f1(p, r) for p, r in zip(ps, rs)])
+    return max(f1s)
+
+def f1(p, r):
+    return 2.0 * p * r / (p + r)
+
+# Functions to easily convert between nodes and indices
+def node_to_index(obj, dtype='graph'):
+    if dtype == 'graph':
+        return dict((n,i) for i, n in enumerate(sorted_nodes(obj)))
+    elif dtype == 'list':
+        return dict((n,i) for i, n in enumerate(obj))
+    else:
+        raise NotImplementedError()
+
+
+def index_to_node(obj, dtype='graph'):
+    if dtype == 'graph':
+        return dict(enumerate(sorted_nodes(obj)))
+    elif dtype == 'list':
+        return dict(enumerate(obj))
+
+def sorted_nodes(G):
+    return sorted(G.nodes())
+
+def save_embeddings(X, nodes, fp, weight=None):
+    ''' Saves embedding data to given file '''
+    joblib.dump(dict(X=X, nodes=nodes, weight=weight), fp)
