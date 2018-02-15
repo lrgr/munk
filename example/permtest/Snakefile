@@ -1,21 +1,53 @@
+import os
+GEN_RANDOM_NETWORKS = '../../src/gen_random_networks.py'
+networks_dir_template = '{}/{}-networks'
+A_networks_dir = networks_dir_template.format(config['output_dir'], config['A_species'])
+B_networks_dir = networks_dir_template.format(config['output_dir'], config['B_species'])
+
+network_list_template = '{}/{}-networks.tsv'
+A_network_list = network_list_template.format(A_networks_dir, config['A_species'])
+B_network_list = network_list_template.format(B_networks_dir, config['B_species'])
+
 rule all:
     input:
-        '../../data/toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_ppi_edgelist.tsv'
-    params:
-        n_graphs = 100,
-        output_dir = 'output/alice',
-        species_name = 'alice',
-        n_jobs = 4,
+        A_network_list, B_network_list
+
+rule A_random_networks:
+    input:
+        config['A_edgelist']
     output:
-        'output/alice/alice_networks.tsv'
+        A_network_list
+    params:
+        A_species = config['A_species'],
+        n_graphs = config['n_graphs'],
+        n_jobs = config['n_jobs']
     shell:
-        """
+        '''
         time \
-        python ../../src/gen_random_networks.py \
-            -s {params.species_name} \
+        python {GEN_RANDOM_NETWORKS} \
+            -s {params.A_species} \
             -e {input} \
             -n {params.n_graphs} \
-            -d {params.output_dir} \
+            -d {A_networks_dir} \
             -j {params.n_jobs} \
-            | tee log.txt
-        """
+        '''
+
+rule B_random_networks:
+    input:
+        config['B_edgelist']
+    output:
+        B_network_list
+    params:
+        B_species = config['B_species'],
+        n_graphs = config['n_graphs'],
+        n_jobs = config['n_jobs']
+    shell:
+        '''
+        time \
+        python {GEN_RANDOM_NETWORKS} \
+            -s {params.B_species} \
+            -e {input} \
+            -n {params.n_graphs} \
+            -d {B_networks_dir} \
+            -j {params.n_jobs} \
+        '''
