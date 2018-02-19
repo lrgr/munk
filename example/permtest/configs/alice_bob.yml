@@ -1,0 +1,8 @@
+A_species: alice
+B_species: bob
+A_edgelist: ../../data/toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_ppi_edgelist.tsv
+B_edgelist: ../../data/toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_ppi_edgelist.tsv
+n_graphs: 10
+n_permutations: 10000
+n_jobs: 5
+output_dir: alice-bob

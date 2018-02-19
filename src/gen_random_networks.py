@@ -86,7 +86,7 @@ def main(args):
 	Parallel(n_jobs=args.n_jobs)(
 			delayed(gen_and_save_random_network)(fp, seed_network) for fp in filepaths)
 
-	with open('{}/{}_networks.tsv'.format(args.output_dir, args.species_name),'w') as OUT:
+	with open('{}/{}-networks.tsv'.format(args.output_dir, args.species_name),'w') as OUT:
 		for fname in filenames:
   			OUT.write("%s\n" % fname)
 
