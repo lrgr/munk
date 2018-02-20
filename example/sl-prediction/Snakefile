@@ -1,0 +1,87 @@
+################################################################################
+# SETTINGS, CONFIGURATION, FILES, AND DIRECTORIES
+################################################################################
+# Configuration
+SRC = config.get('src', 'A') # A or B (default: A)
+TGT = config.get('tgt', 'B') # A or B (default: B)
+
+
+SRC_SPECIES = config.get(SRC).get('name')
+TGT_SPECIES = config.get(TGT).get('name')
+NAME_TO_SPECIES = { SRC_SPECIES: SRC, TGT_SPECIES: TGT }
+
+DATASET_NAME = config.get('dataset_name')
+RUN_NAME = '{}-{}-{}'.format(DATASET_NAME, SRC_SPECIES, TGT_SPECIES)
+
+# Load required modules
+from os.path import join
+
+# Directories
+SRC_CODE_DIR  = '../../src'
+OUTPUT_DIR = join('output', RUN_NAME)
+EMBEDDINGS_DIR = join(OUTPUT_DIR, 'embeddings')
+FEATURES_DIR = join(OUTPUT_DIR, 'features')
+LOG_DIR = join(OUTPUT_DIR, 'log')
+
+# Files
+HANDL = join(SRC_CODE_DIR, 'handl.py')
+
+EMBEDDING_FORMAT_STR = '%s/{name}-HANDL-embedding.pkl' % EMBEDDINGS_DIR
+SRC_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=SRC_SPECIES)
+TGT_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=TGT_SPECIES)
+
+FEATURE_FORMAT_STR = '%s/{name}-features.pkl' % FEATURES_DIR
+SRC_FEATURES = FEATURE_FORMAT_STR.format(name=SRC_SPECIES)
+TGT_FEATURES = FEATURE_FORMAT_STR.format(name=TGT_SPECIES)
+
+SIM_SCORES = '{}/{}-HANDL-similarity-scores.pkl'.format(OUTPUT_DIR, RUN_NAME)
+LANDMARKS = '{}/{}-HANDL-landmarks.tsv'.format(OUTPUT_DIR, RUN_NAME)
+
+################################################################################
+# RULES
+################################################################################
+# General
+rule all:
+    input:
+        SRC_FEATURES,
+        TGT_FEATURES
+        
+# Construct features for the given SL dataset
+rule featurize:
+    input:
+        embedding=EMBEDDING_FORMAT_STR,
+        gis=lambda wildcards: config.get(NAME_TO_SPECIES.get(wildcards.name)).get('gi')
+    output:
+        FEATURE_FORMAT_STR
+    shell:
+        'python featurize_sls.py -ef {input.embedding} -gif {input.gis} '\
+        '-o {output}'
+
+# Construct embeddings
+rule embed:
+    input:
+        src_ppi=config.get(SRC).get('ppi'),
+        tgt_ppi=config.get(TGT).get('ppi'),
+        homologs = config.get(SRC).get('homologs').get(TGT)
+    output:
+        src_embedding=SRC_EMBEDDING,
+        tgt_embedding=TGT_EMBEDDING,
+        sim_scores=SIM_SCORES,
+        landmarks=LANDMARKS
+    params:
+        n_landmarks = config.get('n_landmarks')
+    log:
+        '{}/{}-embed.log'.format(LOG_DIR, RUN_NAME)
+    shell:
+        '''
+        python {HANDL} \
+            --source_edgelist {input.src_ppi} \
+            --target_edgelist {input.tgt_ppi} \
+            --homolog_list {input.homologs} \
+            --source_output_file {output.src_embedding} \
+            --target_output_file {output.tgt_embedding} \
+            --sim_scores_output_file {output.sim_scores} \
+            --landmarks_output_file {output.landmarks} \
+            --n_landmarks {params.n_landmarks} \
+            2>&1 | tee {log}
+        '''
