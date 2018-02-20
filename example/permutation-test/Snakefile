@@ -1,12 +1,14 @@
 import os
 GEN_RANDOM_NETWORKS = '../../src/gen_random_networks.py'
-networks_dir_template = '{}/{}-networks'
-A_networks_dir = networks_dir_template.format(config['output_dir'], config['A_species'])
-B_networks_dir = networks_dir_template.format(config['output_dir'], config['B_species'])
+SPECIES_A, SPECIES_B = config['A_species'], config['B_species']
+OUTPUT_DIR = '{}-{}'.format(SPECIES_A, SPECIES_B)
+networks_dir_template = OUTPUT_DIR + '/{}-networks'
+A_networks_dir = networks_dir_template.format(SPECIES_A)
+B_networks_dir = networks_dir_template.format(SPECIES_B)
 
 network_list_template = '{}/{}-networks.tsv'
-A_network_list = network_list_template.format(A_networks_dir, config['A_species'])
-B_network_list = network_list_template.format(B_networks_dir, config['B_species'])
+A_network_list = network_list_template.format(A_networks_dir, SPECIES_A)
+B_network_list = network_list_template.format(B_networks_dir, SPECIES_B)
 
 rule all:
     input:
@@ -19,7 +21,7 @@ rule A_random_networks:
         A_network_list
     params:
         A_species = config['A_species'],
-        n_graphs = config['n_graphs'],
+        n_graphs = config['n_permutations'],
         n_jobs = config['n_jobs']
     shell:
         '''
@@ -39,7 +41,7 @@ rule B_random_networks:
         B_network_list
     params:
         B_species = config['B_species'],
-        n_graphs = config['n_graphs'],
+        n_graphs = config['n_permutations'],
         n_jobs = config['n_jobs']
     shell:
         '''
