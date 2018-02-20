@@ -72,19 +72,19 @@ def handl_embed_graphs(source_G, target_G, homologs, n_landmarks, lam=0.05, retu
     source_nodes = util.sorted_nodes(source_G)
     target_nodes = util.sorted_nodes(target_G)
 
-    t_start = time.clock()
+    t_start = time.time()
     source_D = regularized_laplacian(source_G, source_nodes, lam)
-    t_end = time.clock()
+    t_end = time.time()
     source_laplacian_time = t_end - t_start
 
-    t_start = time.clock()
+    t_start = time.time()
     source_C = rkhs_factor(source_D)
-    t_end = time.clock()
+    t_end = time.time()
     source_rkhs_time = t_end - t_start 
 
-    t_start = time.clock()
+    t_start = time.time()
     target_D = regularized_laplacian(target_G, target_nodes, lam)
-    t_end = time.clock()
+    t_end = time.time()
     target_laplacian_time = t_end - t_start
 
     source_node2index = util.node_to_index(source_G)
@@ -94,9 +94,9 @@ def handl_embed_graphs(source_G, target_G, homologs, n_landmarks, lam=0.05, retu
     landmark_idxs = [(source_node2index[s_n], target_node2index[t_n]) for 
                      s_n, t_n in landmark_homs]
 
-    t_start = time.clock()
+    t_start = time.time()
     source_C, target_C_hat = handl_embed_matrices(source_C, target_D, landmark_idxs)
-    t_end = time.clock()
+    t_end = time.time()
     handl_time = t_end - t_start
 
     runtimes = dict(source_regularized_laplacian_runtime=source_laplacian_time,
@@ -167,8 +167,11 @@ def main(args):
     target_G = util.simple_two_core(target_G)
     homologs = homologs_in_graphs(source_G, target_G, raw_homologs)
 
+    t_start = time.time()
     source_data, target_data, landmarks, runtimes = \
         handl_embed_graphs(source_G, target_G, homologs, n_landmarks)
+    t_end = time.time()
+    total_time = t_end - t_start
     source_X, source_nodes = source_data
     target_X, target_nodes = target_data
 
@@ -197,7 +200,8 @@ def main(args):
     with open(args.runtimes_file, 'w') as OUT:
         json.dump(dict(n_source_nodes = source_G.number_of_nodes(),
                        n_target_nodes = target_G.number_of_nodes(),
-                       runtimes=runtimes), OUT, indent=2)
+                       runtimes=runtimes,
+                       total_time=total_time), OUT, indent=2)
 
     log.info('HANDL embedding complete!')
 
