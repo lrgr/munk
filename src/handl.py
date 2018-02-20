@@ -1,7 +1,9 @@
 # handl.py Implementation of HANDL
 # Load required modules
 import argparse
+import json
 import random
+import time
 
 import networkx as nx
 import numpy as np
@@ -69,9 +71,21 @@ def handl_embed_graphs(source_G, target_G, homologs, n_landmarks, lam=0.05, retu
 
     source_nodes = util.sorted_nodes(source_G)
     target_nodes = util.sorted_nodes(target_G)
+
+    t_start = time.time()
     source_D = regularized_laplacian(source_G, source_nodes, lam)
-    target_D = regularized_laplacian(target_G, target_nodes, lam)
+    t_end = time.time()
+    source_laplacian_time = t_end - t_start
+
+    t_start = time.time()
     source_C = rkhs_factor(source_D)
+    t_end = time.time()
+    source_rkhs_time = t_end - t_start 
+
+    t_start = time.time()
+    target_D = regularized_laplacian(target_G, target_nodes, lam)
+    t_end = time.time()
+    target_laplacian_time = t_end - t_start
 
     source_node2index = util.node_to_index(source_G)
     target_node2index = util.node_to_index(target_G)
@@ -79,7 +93,17 @@ def handl_embed_graphs(source_G, target_G, homologs, n_landmarks, lam=0.05, retu
     landmark_homs = homologs[:n_landmarks]
     landmark_idxs = [(source_node2index[s_n], target_node2index[t_n]) for 
                      s_n, t_n in landmark_homs]
+
+    t_start = time.time()
     source_C, target_C_hat = handl_embed_matrices(source_C, target_D, landmark_idxs)
+    t_end = time.time()
+    handl_time = t_end - t_start
+
+    runtimes = dict(source_regularized_laplacian_runtime=source_laplacian_time,
+                    source_rkhs_factorization_runtime=source_rkhs_time,
+                    target_regularized_laplacian_runtime=target_laplacian_time,
+                    handl_embed_runtime=handl_time)
+
     if return_idxs:
         homolog_idxs = [(source_node2index[s_n], target_node2index[t_n]) for 
                         s_n, t_n in homologs] 
@@ -88,10 +112,9 @@ def handl_embed_graphs(source_G, target_G, homologs, n_landmarks, lam=0.05, retu
                 landmark_idxs, \
                 homolog_idxs)
     else:
-
         return ((source_C, source_nodes), \
                 (target_C_hat, target_nodes), \
-                landmark_homs)
+                landmark_homs, runtimes)
 
 
 def homologs_in_graphs(G1, G2, homologs):
@@ -118,6 +141,7 @@ def parse_args():
     parser.add_argument('-to', '--target_output_file', type=str, required=True)
     parser.add_argument('-sim', '--sim_scores_output_file', type=str, required=True)
     parser.add_argument('-lo', '--landmarks_output_file', type=str, required=True)
+    parser.add_argument('-r', '--runtimes_file', type=str, required=True)
     parser.add_argument('-n', '--n_landmarks', type=int, required=False, default=400)
     return parser.parse_args()
 
@@ -143,8 +167,11 @@ def main(args):
     target_G = util.simple_two_core(target_G)
     homologs = homologs_in_graphs(source_G, target_G, raw_homologs)
 
-    source_data, target_data, landmarks = \
+    t_start = time.time()
+    source_data, target_data, landmarks, runtimes = \
         handl_embed_graphs(source_G, target_G, homologs, n_landmarks)
+    t_end = time.time()
+    total_time = t_end - t_start
     source_X, source_nodes = source_data
     target_X, target_nodes = target_data
 
@@ -168,6 +195,13 @@ def main(args):
     with open(args.landmarks_output_file, 'w') as OUT:
         for a, b in landmarks:
             OUT.write('%s\t%s\n' % (a, b)) 
+
+    log.info('Saving runtimes to %s', args.runtimes_file)
+    with open(args.runtimes_file, 'w') as OUT:
+        json.dump(dict(n_source_nodes = source_G.number_of_nodes(),
+                       n_target_nodes = target_G.number_of_nodes(),
+                       runtimes=runtimes,
+                       total_time=total_time), OUT, indent=2)
 
     log.info('HANDL embedding complete!')
 

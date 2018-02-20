@@ -15,6 +15,8 @@ A_B_sim_scores = '{}/{}-to-{}-HANDL-similarity-scores.pkl'.format(
     A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B),
 A_B_landmark_list = '{}/{}-to-{}-HANDL-landmarks.tsv'.format(
     A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B)
+A_B_runtimes = '{}/{}-to-{}-runtimes.json'.format(
+    A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B)
 
 # B to A embeddings and outputs
 B_A_source_embedding = '{}/{}-to-{}_{}-HANDL-embedding.pkl'.format(
@@ -25,6 +27,8 @@ B_A_sim_scores = '{}/{}-to-{}-HANDL-similarity-scores.pkl'.format(
     B_A_OUTPUT_DIR, SPECIES_B, SPECIES_A),
 B_A_landmark_list = '{}/{}-to-{}-HANDL-landmarks.tsv'.format(
     B_A_OUTPUT_DIR, SPECIES_B, SPECIES_A)
+B_A_runtimes = '{}/{}-to-{}-HANDL-runtimes.json'.format(
+    B_A_OUTPUT_DIR, SPECIES_B, SPECIES_A)
 
 
 rule all:
@@ -33,11 +37,13 @@ rule all:
          A_B_target_embedding,
          A_B_sim_scores,
          A_B_landmark_list,
+         A_B_runtimes,
 
          B_A_source_embedding,
          B_A_target_embedding,
          B_A_sim_scores,
          B_A_landmark_list,
+         B_A_runtimes,
     
 rule A_B_embed:
     input:
@@ -48,7 +54,8 @@ rule A_B_embed:
         source_embedding = A_B_source_embedding,
         target_embedding = A_B_target_embedding,
         sim_scores = A_B_sim_scores,
-        landmark_list = A_B_landmark_list
+        landmark_list = A_B_landmark_list,
+        runtimes = A_B_runtimes
     params:
         n_landmarks = config['n_landmarks']
     log:
@@ -63,6 +70,7 @@ rule A_B_embed:
             --target_output_file {output.target_embedding} \
             --sim_scores_output_file {output.sim_scores} \
             --landmarks_output_file {output.landmark_list} \
+            --runtimes_file {output.runtimes} \
             --n_landmarks {params.n_landmarks} \
             2>&1 | tee {log}
         '''
@@ -76,7 +84,8 @@ rule B_A_embed:
         source_embedding = B_A_source_embedding,
         target_embedding = B_A_target_embedding,
         sim_scores = B_A_sim_scores,
-        landmark_list = B_A_landmark_list
+        landmark_list = B_A_landmark_list,
+        runtimes = B_A_runtimes
     params:
         n_landmarks = config['n_landmarks']
     log:
@@ -91,6 +100,7 @@ rule B_A_embed:
             --target_output_file {output.target_embedding} \
             --sim_scores_output_file {output.sim_scores} \
             --landmarks_output_file {output.landmark_list} \
+            --runtimes_file {output.runtimes} \
             --n_landmarks {params.n_landmarks} \
             2>&1 | tee {log}
         '''
