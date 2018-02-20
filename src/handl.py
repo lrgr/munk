@@ -83,9 +83,15 @@ def handl_embed_graphs(source_G, target_G, homologs, n_landmarks, lam=0.05, retu
     if return_idxs:
         homolog_idxs = [(source_node2index[s_n], target_node2index[t_n]) for 
                         s_n, t_n in homologs] 
-        return ((source_C, source_nodes), (target_C_hat, target_nodes), landmark_idxs, homolog_idxs)
+        return ((source_C, source_nodes), \
+                (target_C_hat, target_nodes), \
+                landmark_idxs, \
+                homolog_idxs)
     else:
-        return ((source_C, source_nodes), (target_C_hat, target_nodes))
+
+        return ((source_C, source_nodes), \
+                (target_C_hat, target_nodes), \
+                landmark_homs)
 
 
 def homologs_in_graphs(G1, G2, homologs):
@@ -110,6 +116,8 @@ def parse_args():
     parser.add_argument('-hf', '--homolog_list', type=str, required=True)
     parser.add_argument('-so', '--source_output_file', type=str, required=True)
     parser.add_argument('-to', '--target_output_file', type=str, required=True)
+    parser.add_argument('-sim', '--sim_scores_output_file', type=str, required=True)
+    parser.add_argument('-lo', '--landmarks_output_file', type=str, required=True)
     parser.add_argument('-n', '--n_landmarks', type=int, required=False, default=400)
     return parser.parse_args()
 
@@ -121,7 +129,7 @@ def main(args):
     log = get_logger()
 
     log.info('Loading homologs list from %s', args.homolog_list)
-    raw_homologs = utils.read_homolog_list(args.homolog_list)
+    raw_homologs = util.read_homolog_list(args.homolog_list)
 
     log.info('Loading source edgelist from %s', args.source_edgelist)
     source_G = nx.read_edgelist(args.source_edgelist, encoding='ascii')
@@ -135,7 +143,7 @@ def main(args):
     target_G = util.simple_two_core(target_G)
     homologs = homologs_in_graphs(source_G, target_G, raw_homologs)
 
-    source_data, target_data = \
+    source_data, target_data, landmarks = \
         handl_embed_graphs(source_G, target_G, homologs, n_landmarks)
     source_X, source_nodes = source_data
     target_X, target_nodes = target_data
@@ -147,6 +155,20 @@ def main(args):
 
     log.info('Source data shape {}'.format(source_X.shape))
     log.info('Target data shape {}'.format(target_X.shape))
+    
+    log.info('Saving HANDL similarity scores to %s', args.sim_scores_output_file)
+    
+    sim_scores_matrix = np.dot(source_X, target_X.T)
+    joblib.dump(dict(X=sim_scores_matrix, A_nodes=source_nodes, 
+                     B_nodes=target_nodes),
+                args.sim_scores_output_file)
+
+    log.info('Saving landmark list to %s', args.landmarks_output_file)
+
+    with open(args.landmarks_output_file, 'w') as OUT:
+        for a, b in landmarks:
+            OUT.write('%s\t%s\n' % (a, b)) 
+
     log.info('HANDL embedding complete!')
 
 if __name__ == '__main__':

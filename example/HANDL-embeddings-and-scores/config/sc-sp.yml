@@ -1,0 +1,7 @@
+species-A: sc
+species-B: sp
+A-ppi: ../../data/ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi-std.tsv
+B-ppi: ../../data/ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi-std.tsv
+A-to-B-homologs: ../../data/homologs/sc-sp/sc-sp-homologs.txt
+B-to-A-homologs: ../../data/homologs/sc-sp/sp-sc-homologs.txt
+n_landmarks: 400
