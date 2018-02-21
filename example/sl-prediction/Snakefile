@@ -76,11 +76,13 @@ rule featurize:
     input:
         embedding=EMBEDDING_FORMAT_STR,
         gis=lambda wildcards: config.get(NAME_TO_SPECIES.get(wildcards.name)).get('gi')
+    params:
+        sinatra_featurize='--sinatra-featurize' if config.get('sinatra_featurize') else ''
     output:
         FEATURE_FORMAT_STR
     shell:
         'python featurize_sls.py -ef {input.embedding} -gif {input.gis} '\
-        '-o {output}'
+        '-o {output} {params.sinatra_featurize}'
 
 # Construct embeddings
 rule embed:

@@ -14,7 +14,7 @@ homologs/sc-sp/sc-sp-homologs.txt: |
 homologs/sc-sp/sp-sc-homologs.txt: |
     https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/homologs/sc-sp/sp-sc-homologs.txt
 
-# BIOGRID PPIS
+# BIOGRID PPIS v3.4.157
 ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi-std.tsv: |
     https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi-std.tsv
 ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi.tsv: |
@@ -23,6 +23,16 @@ ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi-std.tsv: |
     https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi-std.tsv
 ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi.tsv: |
     https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi.tsv
+
+# BIOGRID PPIS v3.2.104
+ppi/biogrid/sc/sc-biogrid.v3.2.104-ppi-std.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sc/sc-biogrid.v3.2.104-ppi-std.tsv
+ppi/biogrid/sc/sc-biogrid.v3.2.104-ppi.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sc/sc-biogrid.v3.2.104-ppi.tsv
+ppi/biogrid/sp/sp-biogrid.v3.2.104-ppi-std.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sp/sp-biogrid.v3.2.104-ppi-std.tsv
+ppi/biogrid/sp/sp-biogrid.v3.2.104-ppi.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sp/sp-biogrid.v3.2.104-ppi.tsv
 
 # BIOGRID GIs v3.4.157
 gi/biogrid/sp/sp-biogrid.v3.4.157-sls-std.tsv: |
@@ -34,7 +44,7 @@ gi/biogrid/sc/sc-biogrid.v3.4.157-sls-std.tsv: |
 gi/biogrid/sc/sc-biogrid.v3.4.157-sls.tsv: |
     https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/biogrid/sc/sc-biogrid.v3.4.157-sls.tsv
 
-# BIOGRID GIs v3.4.157
+# BIOGRID GIs v3.2.104
 gi/biogrid/sp/sp-biogrid.v3.2.104-sls-std.tsv: |
     https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/biogrid/sp/sp-biogrid.v3.2.104-sls-std.tsv
 gi/biogrid/sp/sp-biogrid.v3.2.104-sls.tsv: |

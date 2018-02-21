@@ -70,6 +70,7 @@ def run( args ):
     if args.sinatra_featurize:
         # For SINaTRA features, we randomly sample a set of
         # non-SLs from nodes in the network
+        import random
         sl_pairs = list(pairs)
         non_sl_pairs = set()
         while len(non_sl_pairs) != len(sl_pairs):
