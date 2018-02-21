@@ -82,40 +82,41 @@ def max_f1_score(_y_true, _y_hat):
     f1s = np.asarray([ f1(p, r) for p, r in zip(ps, rs)])
     return max(f1s)
 
-# Train on A, predict on B. Then train on B, predict on A.
-logger.info('[Training and evaluating models]')
-results = []
-random_state = args.random_seed
+# Helper functions to be used by Parallel to train/predict
+def data_producer(random_state):
+    kf = KFold(n_splits=args.n_folds, random_state=random_state, shuffle=True)
+    for i, (train_index, test_index) in enumerate(kf.split(X_A)):
+        # Split up the source data
+        X_train, X_test = X_A[train_index], X_A[test_index]
+        y_train, y_test = y_A[train_index], y_A[test_index]
 
-# Train on the source data
-kf = KFold(n_splits=args.n_folds, random_state=random_state, shuffle=True)
-for i, (train_index, test_index) in enumerate(kf.split(X_A)):
-    # Split up the source data
-    X_train, X_test = X_A[train_index], X_A[test_index]
-    y_train, y_test = y_A[train_index], y_A[test_index]
+        # Train the classifier within the source and predict within and across species
+        random_state += 1
 
-    # Train the classifier within the source and predict within and across species
-    random_state += 1
+        yield i+1, X_train, y_train, X_test, y_test, random_state
 
+def train_and_predict(fold, _X_train, _y_train, _X_test, _y_test, _random_state):
     # Random forest
     if args.classifier == 'rf':
         # Train the random forest
         clf = RandomForestClassifier(n_estimators=args.n_trees, max_depth=args.max_depth,
-                                     random_state=random_state, n_jobs=args.n_jobs)
+                                     random_state=_random_state,
+                                     n_jobs=args.n_jobs)
+        clf.fit(_X_train, _y_train)
 
         # Make out-of-sample predictions
-        y_test_hat = clf.predict_proba(X_test)[:, 1]
+        y_test_hat = clf.predict_proba(_X_test)[:, 1]
         y_B_hat = clf.predict_proba(X_B)[:, 1]
         
     # SVM
     elif args.classifier == 'svm':
         # Train the Linear SVM
         clf = LinearSVC(C=args.svm_C, tol=args.svm_tolerance)
-        clf.fit(X_train, y_train)
+        clf.fit(_X_train, _y_train)
 
         # Make out of sample predictions. Decision function outputs
         # a single list of values for binary class data.
-        y_test_hat = clf.decision_function(X_test)
+        y_test_hat = clf.decision_function(_X_test)
         y_B_hat = clf.decision_function(X_B)
         
     else:
@@ -123,12 +124,12 @@ for i, (train_index, test_index) in enumerate(kf.split(X_A)):
 
         
     # Report the results
-    results.append({
+    result = {
         "Source": {
             "Name": A_name,
-            "AUPRC": average_precision_score(y_test, y_test_hat),
-            "AUROC": roc_auc_score(y_test, y_test_hat),
-            "F1": max_f1_score(y_test, y_test_hat)
+            "AUPRC": average_precision_score(_y_test, y_test_hat),
+            "AUROC": roc_auc_score(_y_test, y_test_hat),
+            "F1": max_f1_score(_y_test, y_test_hat)
         },
         "Target": {
             "Name": B_name,
@@ -136,15 +137,20 @@ for i, (train_index, test_index) in enumerate(kf.split(X_A)):
             "AUROC": roc_auc_score(y_B, y_B_hat),
             "F1": max_f1_score(y_B, y_B_hat)
         },
-        "Fold": i+1,
-    })
-
-    random_state += 1
-
-    logger.info('- Fold: {}'.format(i+1))
-    logger.info('\t- {0}->{0}: {1}'.format(A_name, format_result(results[-1]['Source'])))
-    logger.info('\t- {0}->{1}: {2}'.format(A_name, B_name, format_result(results[-1]['Target'])))
+        "Fold": fold,
+    }
+    logger.info('- Fold: {}'.format(fold))
+    logger.info('\t- {0}->{0}: {1}'.format(A_name, format_result(result['Source'])))
+    logger.info('\t- {0}->{1}: {2}'.format(A_name, B_name, format_result(result['Target'])))
     
+    return result
+
+# Train on A, predict on held-out A and B, executing in parallel
+logger.info('[Training and evaluating models]')
+from joblib import Parallel, delayed
+r = Parallel(n_jobs=min(args.n_folds, args.n_jobs), verbose=0)( delayed(train_and_predict)(*d) for d in data_producer(args.random_seed) )
+results = r
+
 # Add an "average" row across folds, and report the current results
 average_result = deepcopy(results[-1])
 average_result['Fold'] = 'Average'
