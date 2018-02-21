@@ -67,6 +67,7 @@ def handl_embed_graphs(source_G, target_G, homologs, n_landmarks, lam=0.05, retu
     
     :return: HANDL embeddings for source and target species
     '''
+
     assert(n_landmarks <= len(homologs))
 
     source_nodes = util.sorted_nodes(source_G)

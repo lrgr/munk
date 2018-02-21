@@ -5,7 +5,6 @@
 SRC = config.get('src', 'A') # A or B (default: A)
 TGT = config.get('tgt', 'B') # A or B (default: B)
 
-
 SRC_SPECIES = config.get(SRC).get('name')
 TGT_SPECIES = config.get(TGT).get('name')
 NAME_TO_SPECIES = { SRC_SPECIES: SRC, TGT_SPECIES: TGT }
@@ -18,7 +17,7 @@ from os.path import join
 
 # Directories
 SRC_CODE_DIR  = '../../src'
-OUTPUT_DIR = join('output', RUN_NAME)
+OUTPUT_DIR = join(config.get('output_dir', 'output'), RUN_NAME) # default prefix: output
 EMBEDDINGS_DIR = join(OUTPUT_DIR, 'embeddings')
 FEATURES_DIR = join(OUTPUT_DIR, 'features')
 LOG_DIR = join(OUTPUT_DIR, 'log')
@@ -36,6 +35,9 @@ TGT_FEATURES = FEATURE_FORMAT_STR.format(name=TGT_SPECIES)
 
 SIM_SCORES = '{}/{}-HANDL-similarity-scores.pkl'.format(OUTPUT_DIR, RUN_NAME)
 LANDMARKS = '{}/{}-HANDL-landmarks.tsv'.format(OUTPUT_DIR, RUN_NAME)
+RUNTIMES_FILE = '{}/{}-HANDL-runtimes.tsv'.format(OUTPUT_DIR, RUN_NAME)
+
+PREDICTION_SUMMARY = join(OUTPUT_DIR, '{}-prediction-summary.tsv'.format(RUN_NAME))
 
 ################################################################################
 # RULES
@@ -43,8 +45,31 @@ LANDMARKS = '{}/{}-HANDL-landmarks.tsv'.format(OUTPUT_DIR, RUN_NAME)
 # General
 rule all:
     input:
-        SRC_FEATURES,
-        TGT_FEATURES
+        PREDICTION_SUMMARY
+
+# Train and predict
+rule train_and_predict:
+    input:
+        src=SRC_FEATURES,
+        tgt=TGT_FEATURES
+    params:
+        names='{} {}'.format(SRC_SPECIES, TGT_SPECIES),
+        random_seed=config.get('random_seed', 182675),
+        n_folds=config.get('n_folds', 4),
+        n_jobs=config.get('n_jobs', 1),
+        classifier=config.get('classifier', 'svm'),
+        n_trees='-nt ' + config.get('n_trees', 100) if 'n_trees' in config else '',
+        max_depth='-md ' + config.get('max_depth') if 'max_depth' in config else '',
+        svm_C='-sc ' + config.get('svm_C', 1.0) if 'svm_C' in config else '',
+        svm_tol='-st ' + config.get('svm_tol', 1e-3) if 'svm_tol' in config else ''
+    threads: config.get('n_jobs', 1)
+    output:
+        summary=PREDICTION_SUMMARY
+    shell:
+        'python train_and_predict.py -ff {input.src} {input.tgt} '\
+        '-n {params.names} -o {output.summary} -rs {params.random_seed} '\
+        '-nj {params.n_jobs} -nf {params.n_folds} {params.classifier} '
+        '{params.n_trees} {params.max_depth} {params.svm_C} {params.svm_tol}'
         
 # Construct features for the given SL dataset
 rule featurize:
@@ -67,7 +92,8 @@ rule embed:
         src_embedding=SRC_EMBEDDING,
         tgt_embedding=TGT_EMBEDDING,
         sim_scores=SIM_SCORES,
-        landmarks=LANDMARKS
+        landmarks=LANDMARKS,
+        runtimes=RUNTIMES_FILE
     params:
         n_landmarks = config.get('n_landmarks')
     log:
@@ -82,6 +108,7 @@ rule embed:
             --target_output_file {output.tgt_embedding} \
             --sim_scores_output_file {output.sim_scores} \
             --landmarks_output_file {output.landmarks} \
+            --runtimes_file {output.runtimes} \
             --n_landmarks {params.n_landmarks} \
             2>&1 | tee {log}
         '''
