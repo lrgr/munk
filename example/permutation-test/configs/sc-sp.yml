@@ -1,6 +1,8 @@
 A_species: sp
 B_species: sc
-A_edgelist: ../../data/ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi-std.tsv
-B_edgelist: ../../data/ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi-std.tsv
-n_permutations: 10
-n_jobs: 5
+edgelists:
+    sc: ../../data/ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi-std.tsv
+    sp: ../../data/ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi-std.tsv
+n_permutations: 1000
+n_tries: 50
+threads: 24
