@@ -86,14 +86,18 @@ def difference_in_means_from_files(source_data_file,
                         n_landmarks,
                         ref_source_nodes,
                         ref_target_nodes):
-    source_data = joblib.load(source_data_file)
-    target_data = joblib.load(target_data_file)
-    return difference_in_means(source_data,
-                               target_data,
-                               homologs,
-                               n_landmarks,
-                               ref_source_nodes,
-                               ref_target_nodes)
+    try:
+        source_data = joblib.load(source_data_file)
+        target_data = joblib.load(target_data_file)
+        return difference_in_means(source_data,
+                                   target_data,
+                                   homologs,
+                                   n_landmarks,
+                                   ref_source_nodes,
+                                   ref_target_nodes)
+    except:
+        print('ERROR with {}, {}'.format(source_data_file, target_data_file))
+        return None
 
 def one_tail_pval(observed, dist):
     n_less_than = np.sum(np.where(dist > observed))
@@ -155,6 +159,9 @@ def main(args):
                         target_nodes)
                 for source_data_fp, target_data_fp in 
                     zip(source_data_files, target_data_files))
+    errs = [1 for m in means if m is None]
+    print('ERRORS:', len(errs))
+    means = [m for m in means if m is not None]
 
     rand_G_mean_diffs, rand_G_other_means, rand_G_hom_means = zip(*means)
     log.info('Mean difference in means between homologs and non-homologs scores for random graphs %f', np.mean(rand_G_mean_diffs))
@@ -164,7 +171,7 @@ def main(args):
     log.info('P-value: %f', p_val)
     log.info('Effect-size: %f', e_size)
     log.info('# permutations: %d', n_permutations)
-    results = dict(pval=p_val, effect_size=e_size, n_permutations=n_permutations)
+    results = dict(pval=p_val, effect_size=e_size, n_permutations=n_permutations, errs=len(errs))
 
     log.info('Writing results to %s', args.output_file)
     with open(args.output_file, 'w') as OUT:
