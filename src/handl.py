@@ -17,7 +17,7 @@ from i_o import get_logger
 # utility to seperate scores
 ###############################################################################
 
-def seperate_scores(scores, landmark_pair_idxs, homolog_pair_idxs):
+def separate_scores(scores, landmark_pair_idxs, homolog_pair_idxs):
     ''' 
     Separate scores into the following 5 categories:
         1. Landmark - Landmark pair scores

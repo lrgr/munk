@@ -14,13 +14,14 @@ B_network_list = network_list_template.format(B_networks_dir, SPECIES_B)
 network_template = '{out_dir}/{name}-networks/{name}-{i}.pkl'
 log_template = '{out_dir}/log/{name}-networks/{name}-{i}.log'
 results_template = '{out_dir}/{source_name}-to-{target_name}-permtest-results.json'
+diffs_template = '{out_dir}/{source_name}-to-{target_name}-permtest-diffs.pkl'
+
 rule all:
     input:
-        expand(results_template, \
-               out_dir = OUTPUT_DIR, \
-               source_name = SPECIES_A, \
-               target_name = SPECIES_B)
-
+        expand([results_template, diffs_template], zip,\
+               out_dir = [OUTPUT_DIR] * 2, \
+               source_name = [SPECIES_A, SPECIES_B], \
+               target_name = [SPECIES_B, SPECIES_A])
 
 rule permtest:
     input:
@@ -29,20 +30,26 @@ rule permtest:
                 expand(network_template, \
                     out_dir=OUTPUT_DIR, \
                     name=w.source_name, \
-                    i=range(3)),
+                    i=range(config['n_permutations'])),
 
         target_random_network_data = \
             lambda w: \
                 expand(network_template, \
                     out_dir=OUTPUT_DIR, \
                     name=w.target_name, \
-                    i=range(3)),
+                    i=range(config['n_permutations'])),
 
         source_ppi = lambda w: config['edgelists'][w.source_name],
 
-        target_ppi = lambda w: config['edgelists'][w.target_name]
+        target_ppi = lambda w: config['edgelists'][w.target_name],
+        homologs = lambda w: \
+            config['homologs']['{}-{}'.format(w.source_name, w.target_name)]
     output:
-        results_template
+        json_results=results_template,
+        diffs=diffs_template
+    params:
+        n_landmarks = config['n_landmarks'], 
+        lam = config['lambda']
     threads:
        config['threads']
     shell:
@@ -50,9 +57,13 @@ rule permtest:
         python {PERMTEST} \
             -s {input.source_ppi}\
             -t {input.target_ppi}\
+            -hom {input.homologs}\
+            -nl {params.n_landmarks}\
+            -lam {params.lam} \
             -sf {input.source_random_network_data}\
             -tf {input.target_random_network_data}\
-            -o TMP \
+            -o {output.json_results} \
+            -dof {output.diffs} \
             -j {threads}
         '''
 
