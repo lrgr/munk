@@ -6,7 +6,7 @@ edgelists:
 homologs:
     sc-sp: ../../data/homologs/sc-sp/sc-sp-homologs.txt
     sp-sc: ../../data/homologs/sc-sp/sp-sc-homologs.txt
-n_permutations: 1000
+n_permutations: 1100
 n_landmarks: 400
 lambda: 0.05
 
