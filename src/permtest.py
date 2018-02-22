@@ -100,8 +100,9 @@ def difference_in_means_from_files(source_data_file,
         return None
 
 def one_tail_pval(observed, dist):
-    n_less_than = np.sum(np.where(dist > observed))
-    return n_less_than / len(dist)
+    n_less_than = float(np.sum( dist > observed ))
+
+    return n_less_than / float(len(dist)), n_less_than, float(len(dist))
 
 def effect_size(observed, control):
     std_dev = np.std(control)
@@ -165,13 +166,14 @@ def main(args):
 
     rand_G_mean_diffs, rand_G_other_means, rand_G_hom_means = zip(*means)
     log.info('Mean difference in means between homologs and non-homologs scores for random graphs %f', np.mean(rand_G_mean_diffs))
-    p_val = one_tail_pval(real_diff, rand_G_mean_diffs)
+    p_val, n_less_than, n_observations = one_tail_pval(real_diff, rand_G_mean_diffs)
+    log.info('N permutations less than real: %d, N permutations %d', n_less_than, n_observations)
     e_size = effect_size(real_diff, rand_G_mean_diffs)
 
     log.info('P-value: %f', p_val)
     log.info('Effect-size: %f', e_size)
     log.info('# permutations: %d', n_permutations)
-    results = dict(pval=p_val, effect_size=e_size, n_permutations=n_permutations, errs=len(errs))
+    results = dict(pval=p_val, effect_size=e_size, n_permutations=n_observations, n_less_than=n_less_than, errs=len(errs))
 
     log.info('Writing results to %s', args.output_file)
     with open(args.output_file, 'w') as OUT:

@@ -15,6 +15,7 @@ network_template = '{out_dir}/{name}-networks/{name}-{i}.pkl'
 log_template = '{out_dir}/log/{name}-networks/{name}-{i}.log'
 results_template = '{out_dir}/{source_name}-to-{target_name}-permtest-results.json'
 diffs_template = '{out_dir}/{source_name}-to-{target_name}-permtest-diffs.pkl'
+perm_test_log_template = '{out_dir}/{source_name}-to-{target_name}-permtest.log'
 
 rule all:
     input:
@@ -50,6 +51,8 @@ rule permtest:
     params:
         n_landmarks = config['n_landmarks'], 
         lam = config['lambda']
+    log:
+        perm_test_log_template
     threads:
        config['threads']
     shell:
@@ -64,7 +67,8 @@ rule permtest:
             -tf {input.target_random_network_data}\
             -o {output.json_results} \
             -dof {output.diffs} \
-            -j {threads}
+            -j {threads} \
+        2>&1 | tee {log}
         '''
 
 rule rand_networks:
