@@ -18,6 +18,7 @@
     "n_landmarks": 400,
     "dataset_name": "biogrid.v3.2.104",
     "sinatra_featurize": true,
+    "hold_outs": ["genes", "pairs"],
     "n_jobs": 8,
     "n_folds": 5
 }

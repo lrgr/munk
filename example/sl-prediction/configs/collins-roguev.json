@@ -18,5 +18,6 @@
     "n_landmarks": 400,
     "dataset_name": "collins-roguev",
     "output_dir": "/scratch0/mdml/HANDL/example/sl-prediction/output",
-    "n_jobs": 8
+    "n_jobs": 8,
+    "hold_outs": ["genes", "pairs"]
 }

@@ -101,6 +101,6 @@ def index_to_node(obj, dtype='graph'):
 def sorted_nodes(G):
     return sorted(G.nodes())
 
-def save_embeddings(X, nodes, fp, weight=None):
+def save_embeddings(X, nodes, landmarks, fp, weight=None):
     ''' Saves embedding data to given file '''
-    joblib.dump(dict(X=X, nodes=nodes, weight=weight), fp)
+    joblib.dump(dict(X=X, nodes=nodes, landmarks=landmarks, weight=weight), fp)

@@ -10,7 +10,10 @@ TGT_SPECIES = config.get(TGT).get('name')
 NAME_TO_SPECIES = { SRC_SPECIES: SRC, TGT_SPECIES: TGT }
 
 DATASET_NAME = config.get('dataset_name')
-RUN_NAME = '{}-{}-{}'.format(DATASET_NAME, SRC_SPECIES, TGT_SPECIES)
+RUN_NAME = '-'.join([DATASET_NAME, SRC_SPECIES, TGT_SPECIES])
+
+WITH_LANDMARKS = 'w_landmarks'
+NO_LANDMARKS = 'no_landmarks'
 
 # Load required modules
 from os.path import join
@@ -29,15 +32,15 @@ EMBEDDING_FORMAT_STR = '%s/{name}-HANDL-embedding.pkl' % EMBEDDINGS_DIR
 SRC_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=SRC_SPECIES)
 TGT_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=TGT_SPECIES)
 
-FEATURE_FORMAT_STR = '%s/{name}-features.pkl' % FEATURES_DIR
-SRC_FEATURES = FEATURE_FORMAT_STR.format(name=SRC_SPECIES)
-TGT_FEATURES = FEATURE_FORMAT_STR.format(name=TGT_SPECIES)
+FEATURE_FORMAT_STR = '%s/{name}-features-{landmarks}.pkl' % FEATURES_DIR
+SRC_FEATURES = FEATURE_FORMAT_STR.format(name=SRC_SPECIES, landmarks='{landmarks}')
+TGT_FEATURES = FEATURE_FORMAT_STR.format(name=TGT_SPECIES, landmarks='{landmarks}')
 
 SIM_SCORES = '{}/{}-HANDL-similarity-scores.pkl'.format(OUTPUT_DIR, RUN_NAME)
 LANDMARKS = '{}/{}-HANDL-landmarks.tsv'.format(OUTPUT_DIR, RUN_NAME)
 RUNTIMES_FILE = '{}/{}-HANDL-runtimes.tsv'.format(OUTPUT_DIR, RUN_NAME)
 
-PREDICTION_SUMMARY = join(OUTPUT_DIR, '{}-prediction-summary.tsv'.format(RUN_NAME))
+PREDICTION_SUMMARY_FMT = join(OUTPUT_DIR, '{}-prediction-summary-{{hold_out}}-{{landmarks}}.tsv'.format(RUN_NAME))
 
 ################################################################################
 # RULES
@@ -45,7 +48,7 @@ PREDICTION_SUMMARY = join(OUTPUT_DIR, '{}-prediction-summary.tsv'.format(RUN_NAM
 # General
 rule all:
     input:
-        PREDICTION_SUMMARY
+        expand(PREDICTION_SUMMARY_FMT, hold_out=config.get('hold_outs'), landmarks=[WITH_LANDMARKS, NO_LANDMARKS])
 
 # Train and predict
 rule train_and_predict:
@@ -57,6 +60,7 @@ rule train_and_predict:
         random_seed=config.get('random_seed', 182675),
         n_folds=config.get('n_folds', 4),
         n_jobs=config.get('n_jobs', 1),
+        hold_out=lambda wildcards: wildcards.get('hold_out'),
         classifier=config.get('classifier', 'svm'),
         n_trees='-nt ' + config.get('n_trees', 100) if 'n_trees' in config else '',
         max_depth='-md ' + config.get('max_depth') if 'max_depth' in config else '',
@@ -64,12 +68,13 @@ rule train_and_predict:
         svm_tol='-st ' + config.get('svm_tol', 1e-3) if 'svm_tol' in config else ''
     threads: config.get('n_jobs', 1)
     output:
-        summary=PREDICTION_SUMMARY
+        summary=PREDICTION_SUMMARY_FMT
     shell:
         'python train_and_predict.py -ff {input.src} {input.tgt} '\
         '-n {params.names} -o {output.summary} -rs {params.random_seed} '\
-        '-nj {params.n_jobs} -nf {params.n_folds} {params.classifier} '
-        '{params.n_trees} {params.max_depth} {params.svm_C} {params.svm_tol}'
+        '-nj {params.n_jobs} -nf {params.n_folds} -ho {params.hold_out} '\
+        '{params.classifier} {params.n_trees} {params.max_depth} '\
+        '{params.svm_C} {params.svm_tol}'
         
 # Construct features for the given SL dataset
 rule featurize:
@@ -77,12 +82,13 @@ rule featurize:
         embedding=EMBEDDING_FORMAT_STR,
         gis=lambda wildcards: config.get(NAME_TO_SPECIES.get(wildcards.name)).get('gi')
     params:
-        sinatra_featurize='--sinatra-featurize' if config.get('sinatra_featurize') else ''
+        sinatra_featurize='--sinatra-featurize' if config.get('sinatra_featurize') else '',
+        remove_landmarks=lambda wildcards: '--remove-landmarks' if wildcards.get('landmarks') == 'no_landmarks' else ''
     output:
         FEATURE_FORMAT_STR
     shell:
         'python featurize_sls.py -ef {input.embedding} -gif {input.gis} '\
-        '-o {output} {params.sinatra_featurize}'
+        '-o {output} {params.sinatra_featurize} {params.remove_landmarks}'
 
 # Construct embeddings
 rule embed:
@@ -97,7 +103,8 @@ rule embed:
         landmarks=LANDMARKS,
         runtimes=RUNTIMES_FILE
     params:
-        n_landmarks = config.get('n_landmarks')
+        n_landmarks = config.get('n_landmarks'),
+        random_seed = config.get('random_seed', 182675)
     log:
         '{}/{}-embed.log'.format(LOG_DIR, RUN_NAME)
     shell:
@@ -112,5 +119,6 @@ rule embed:
             --landmarks_output_file {output.landmarks} \
             --runtimes_file {output.runtimes} \
             --n_landmarks {params.n_landmarks} \
+            --random_seed {params.random_seed}
             2>&1 | tee {log}
         '''

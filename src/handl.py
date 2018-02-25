@@ -144,6 +144,7 @@ def parse_args():
     parser.add_argument('-lo', '--landmarks_output_file', type=str, required=True)
     parser.add_argument('-r', '--runtimes_file', type=str, required=True)
     parser.add_argument('-n', '--n_landmarks', type=int, required=False, default=400)
+    parser.add_argument('-rs', '--random_seed', type=int, required=False, default=28791)
     return parser.parse_args()
 
 def main(args):
@@ -152,6 +153,7 @@ def main(args):
     homologs.
     '''
     log = get_logger()
+    random.seed(args.random_seed)
 
     log.info('Loading homologs list from %s', args.homolog_list)
     raw_homologs = util.read_homolog_list(args.homolog_list)
@@ -167,6 +169,7 @@ def main(args):
     source_G = util.simple_two_core(source_G)
     target_G = util.simple_two_core(target_G)
     homologs = homologs_in_graphs(source_G, target_G, raw_homologs)
+    # random.shuffle(homologs)
 
     t_start = time.time()
     source_data, target_data, landmarks, runtimes = \
@@ -175,11 +178,13 @@ def main(args):
     total_time = t_end - t_start
     source_X, source_nodes = source_data
     target_X, target_nodes = target_data
+    source_landmarks = [ l[0] for l in landmarks ]
+    target_landmarks = [ l[1] for l in landmarks ]
 
     log.info('Saving source species embeddings to %s', args.source_output_file)
-    util.save_embeddings(source_X, source_nodes, args.source_output_file)
+    util.save_embeddings(source_X, source_nodes, source_landmarks, args.source_output_file)
     log.info('Saving target species embeddings to %s', args.target_output_file)
-    util.save_embeddings(target_X, target_nodes, args.target_output_file)
+    util.save_embeddings(target_X, target_nodes, target_landmarks, args.target_output_file)
 
     log.info('Source data shape {}'.format(source_X.shape))
     log.info('Target data shape {}'.format(target_X.shape))

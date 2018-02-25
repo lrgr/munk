@@ -28,6 +28,7 @@ def get_parser():
     parser.add_argument('-v', '--verbosity', type=int, required=False,
                         default=logging.INFO)
     parser.add_argument('--sinatra-featurize', action='store_true', default=False)
+    parser.add_argument('--remove-landmarks', action='store_true', default=False)
     return parser
 
 # Main
@@ -59,14 +60,21 @@ def run( args ):
     obj = joblib.load(args.embedding_file)
     embedding = obj.get('X')
     nodes = obj.get('nodes')
+    landmark_nodes = set(obj.get('landmarks'))
     node_set = set(nodes)
     n_nodes = len(nodes)
     nodeToIndex = dict(zip(nodes, range(n_nodes)))
     logger.info('- %s nodes' % n_nodes)
-
+    logger.info('- %s landmarks' % len(landmark_nodes))
+        
     # Restrict to pairs also in the network
     pairs = [ p for p in pairs if all([ u in node_set for u in p ]) and len(p) == 2 ]
     logger.info('- Restricting to %s pairs in the network' % len(pairs))
+    
+    if args.remove_landmarks:
+        pairs = [ p for p in pairs if all([ u not in landmark_nodes for u in p ]) ]
+        logger.info('- Restricting to %s pairs in the network without landmarks' % len(pairs))
+    
     if args.sinatra_featurize:
         # For SINaTRA features, we randomly sample a set of
         # non-SLs from nodes in the network
@@ -74,7 +82,10 @@ def run( args ):
         sl_pairs = list(pairs)
         non_sl_pairs = set()
         while len(non_sl_pairs) != len(sl_pairs):
-            p = frozenset(random.sample(nodes, 2))
+            if args.remove_landmarks:
+                p = frozenset(random.sample(node_set-landmark_nodes, 2))
+            else:
+                p = frozenset(random.sample(nodes, 2))
             if p not in sl_pairs and p not in non_sl_pairs:
                 non_sl_pairs.add( p )
                 

@@ -9,3 +9,7 @@ INCONCLUSIVE = 'Inconclusive'
 ADD_FEATURES = 'add'
 MEAN_FEATURES = 'mean'
 FEATURE_FUNCTIONS = { ADD_FEATURES, MEAN_FEATURES }
+
+# Cross-validation choices
+GENES = 'genes'
+GENE_PAIRS = 'pairs'

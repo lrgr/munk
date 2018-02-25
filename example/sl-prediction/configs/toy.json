@@ -16,5 +16,6 @@
 	}
     },
     "n_landmarks": 20,
-    "dataset_name": "toy"
+    "dataset_name": "toy",
+    "hold_outs": ["genes", "pairs"]
 }

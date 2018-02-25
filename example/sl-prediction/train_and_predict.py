@@ -23,6 +23,8 @@ parser.add_argument('-v', '--verbosity', type=int, default=logging.INFO, require
 parser.add_argument('-rs', '--random_seed', type=int, default=1764, required=False)
 parser.add_argument('-nf', '--n_folds', type=int, default=4, required=False)
 parser.add_argument('-nj', '--n_jobs', type=int, default=1, required=False)
+parser.add_argument('-ho', '--hold-out', type=str, choices=[GENE_PAIRS, GENES],
+                    default=GENE_PAIRS, required=False)
 
 # Add classifier choices with subparsers
 subparser = parser.add_subparsers(dest='classifier', help='Classifier')
@@ -85,15 +87,35 @@ def max_f1_score(_y_true, _y_hat):
 # Helper functions to be used by Parallel to train/predict
 def data_producer(random_state):
     kf = KFold(n_splits=args.n_folds, random_state=random_state, shuffle=True)
-    for i, (train_index, test_index) in enumerate(kf.split(X_A)):
-        # Split up the source data
-        X_train, X_test = X_A[train_index], X_A[test_index]
-        y_train, y_test = y_A[train_index], y_A[test_index]
+    if args.hold_out == GENE_PAIRS:
+        for i, (train_index, test_index) in enumerate(kf.split(X_A)):
+            # Split up the source data
+            X_train, X_test = X_A[train_index], X_A[test_index]
+            y_train, y_test = y_A[train_index], y_A[test_index]
 
-        # Train the classifier within the source and predict within and across species
-        random_state += 1
+            # Train the classifier within the source and predict within and across species
+            random_state += 1
 
-        yield i+1, X_train, y_train, X_test, y_test, random_state
+            yield i+1, X_train, y_train, X_test, y_test, random_state
+    elif args.hold_out == GENES:
+        # Get a list of genes
+        A_genes = sorted(set( g for p in A_pairs for g in p ))
+
+        # Split on genes
+        A_pair_indices = set(range(len(A_pairs)))
+        for i, (train_gene_index, test_gene_index) in enumerate(kf.split(A_genes)):
+            # Get the train/test indices
+            train_gene_set = set( A_genes[i] for i in train_gene_index )
+            train_index = [ j for j, p in enumerate(A_pairs) if all( g in train_gene_set for g in p ) ]
+            test_index = sorted(A_pair_indices - set(train_index))
+
+            # Split up the source data
+            X_train, X_test = X_A[train_index], X_A[test_index]
+            y_train, y_test = y_A[train_index], y_A[test_index]
+
+            # Increment random state
+            random_state += 1
+            yield i+1, X_train, y_train, X_test, y_test, random_state
 
 def train_and_predict(fold, _X_train, _y_train, _X_test, _y_test, _random_state):
     # Random forest
@@ -138,6 +160,8 @@ def train_and_predict(fold, _X_train, _y_train, _X_test, _y_test, _random_state)
             "F1": max_f1_score(y_B, y_B_hat)
         },
         "Fold": fold,
+        "Train size": len(_y_train),
+        "Test size": len(_y_test),
     }
     logger.info('- Fold: {}'.format(fold))
     logger.info('\t- {0}->{0}: {1}'.format(A_name, format_result(result['Source'])))
@@ -170,10 +194,12 @@ for r in results:
             "AUROC": r[ty]['AUROC'],
             "AUPRC": r[ty]['AUPRC'],
             "F1": r[ty]['F1'],
-            "Fold": r['Fold']
+            "Fold": r['Fold'],
+            "Train size": r['Train size'],
+            "Test size": r['Test size']
         })
     
 # Output results to file
-df = pd.DataFrame(flat_results)[['Train', 'Test', 'Fold', 'AUPRC', 'AUROC', 'F1']]
+df = pd.DataFrame(flat_results)[['Train', 'Test', 'Fold', 'F1', 'AUROC', 'AUPRC', 'Train size', 'Test size']]
 df = df.sort_values(['Train', 'Test', 'Fold'])
 df.to_csv(args.output_file, sep='\t', index=False)
