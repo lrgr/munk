@@ -171,7 +171,7 @@ def train_and_predict(fold, _X_train, _y_train, _X_test, _y_test, _random_state)
 
 # Train on A, predict on held-out A and B, executing in parallel
 logger.info('[Training and evaluating models]')
-from joblib import Parallel, delayed
+from sklearn.externals.joblib import Parallel, delayed
 r = Parallel(n_jobs=min(args.n_folds, args.n_jobs), verbose=0)( delayed(train_and_predict)(*d) for d in data_producer(args.random_seed) )
 results = r
 
