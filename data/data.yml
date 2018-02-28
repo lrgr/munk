@@ -67,3 +67,5 @@ toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data.tsv: |
         https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data.tsv
 toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data_info.txt: |
         https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data_info.txt
+toy/degree_sum_model/examples/alice_n100_d14-bob_n120_d14-homologs.txt: |
+        https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/alice_n100_d14-bob_n120_d14-homologs.txt
