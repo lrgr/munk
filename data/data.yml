@@ -14,7 +14,7 @@ homologs/sc-sp/sc-sp-homologs.txt: |
 homologs/sc-sp/sp-sc-homologs.txt: |
     https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/homologs/sc-sp/sp-sc-homologs.txt
 
-# BIOGRID PPIS
+# BIOGRID PPIS v3.4.157
 ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi-std.tsv: |
     https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi-std.tsv
 ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi.tsv: |
@@ -24,6 +24,36 @@ ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi-std.tsv: |
 ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi.tsv: |
     https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi.tsv
 
+# BIOGRID PPIS v3.2.104
+ppi/biogrid/sc/sc-biogrid.v3.2.104-ppi-std.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sc/sc-biogrid.v3.2.104-ppi-std.tsv
+ppi/biogrid/sc/sc-biogrid.v3.2.104-ppi.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sc/sc-biogrid.v3.2.104-ppi.tsv
+ppi/biogrid/sp/sp-biogrid.v3.2.104-ppi-std.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sp/sp-biogrid.v3.2.104-ppi-std.tsv
+ppi/biogrid/sp/sp-biogrid.v3.2.104-ppi.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/biogrid/sp/sp-biogrid.v3.2.104-ppi.tsv
+
+# BIOGRID GIs v3.4.157
+gi/biogrid/sp/sp-biogrid.v3.4.157-sls-std.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/biogrid/sp/sp-biogrid.v3.4.157-sls-std.tsv
+gi/biogrid/sp/sp-biogrid.v3.4.157-sls.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/biogrid/sp/sp-biogrid.v3.4.157-sls.tsv
+gi/biogrid/sc/sc-biogrid.v3.4.157-sls-std.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/biogrid/sc/sc-biogrid.v3.4.157-sls-std.tsv
+gi/biogrid/sc/sc-biogrid.v3.4.157-sls.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/biogrid/sc/sc-biogrid.v3.4.157-sls.tsv
+
+# BIOGRID GIs v3.2.104
+gi/biogrid/sp/sp-biogrid.v3.2.104-sls-std.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/biogrid/sp/sp-biogrid.v3.2.104-sls-std.tsv
+gi/biogrid/sp/sp-biogrid.v3.2.104-sls.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/biogrid/sp/sp-biogrid.v3.2.104-sls.tsv
+gi/biogrid/sc/sc-biogrid.v3.2.104-sls-std.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/biogrid/sc/sc-biogrid.v3.2.104-sls-std.tsv
+gi/biogrid/sc/sc-biogrid.v3.2.104-sls.tsv: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/gi/biogrid/sc/sc-biogrid.v3.2.104-sls.tsv
+   
 # Toy data:
 toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_ppi_edgelist.tsv: |
         https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_ppi_edgelist.tsv
@@ -37,3 +67,5 @@ toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data.tsv: |
         https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data.tsv
 toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data_info.txt: |
         https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data_info.txt
+toy/degree_sum_model/examples/alice_n100_d14-bob_n120_d14-homologs.txt: |
+        https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/alice_n100_d14-bob_n120_d14-homologs.txt
