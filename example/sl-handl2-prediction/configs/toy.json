@@ -1,0 +1,21 @@
+{
+    "A": {
+	"name": "alice",
+	"ppi": "../../data/toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_ppi_edgelist.tsv",
+	"gi": "../../data/toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_sl_data.tsv",
+	"homologs": {
+	    "B": "../../data/toy/degree_sum_model/examples/alice_n100_d14-bob_n120_d14-homologs.txt"
+	}
+    },
+    "B": {
+	"name": "bob",
+	"ppi": "../../data/toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_ppi_edgelist.tsv",
+	"gi": "../../data/toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data.tsv",
+	"homologs": {
+	    "A": "../../data/toy/degree_sum_model/examples/alice_n100_d14-bob_n120_d14-homologs.txt"
+	}
+    },
+    "n_landmarks": 20,
+    "dataset_name": "toy",
+    "hold_outs": ["genes", "pairs"]
+}
