@@ -41,7 +41,6 @@ LANDMARKS = '{}/{}-HANDL-landmarks.tsv'.format(OUTPUT_DIR, RUN_NAME)
 RUNTIMES_FILE = '{}/{}-HANDL-runtimes.tsv'.format(OUTPUT_DIR, RUN_NAME)
 
 PREDICTION_SUMMARY_FMT = join(OUTPUT_DIR, '{}-prediction-summary-{{hold_out}}-{{landmarks}}.tsv'.format(RUN_NAME))
-PREDICTION_DATA_FMT = join(OUTPUT_DIR, '{}-prediction-data-{{hold_out}}-{{landmarks}}.pkl'.format(RUN_NAME))
 
 ################################################################################
 # RULES
@@ -49,17 +48,15 @@ PREDICTION_DATA_FMT = join(OUTPUT_DIR, '{}-prediction-data-{{hold_out}}-{{landma
 # General
 rule all:
     input:
-        expand(PREDICTION_SUMMARY_FMT, hold_out=config.get('hold_outs'), landmarks=[WITH_LANDMARKS, NO_LANDMARKS]),
-        expand(PREDICTION_DATA_FMT, hold_out=config.get('hold_outs'), landmarks=[WITH_LANDMARKS, NO_LANDMARKS])
-        
+        expand(PREDICTION_SUMMARY_FMT, hold_out=config.get('hold_outs'), landmarks=[WITH_LANDMARKS, NO_LANDMARKS])
 
 # Train and predict
 rule train_and_predict:
     input:
-        src=SRC_FEATURES,
-        tgt=TGT_FEATURES
+        tgt=TGT_FEATURES,
+        src=SRC_FEATURES
     params:
-        names='{} {}'.format(SRC_SPECIES, TGT_SPECIES),
+        names='{} {}'.format(TGT_SPECIES, SRC_SPECIES),
         random_seed=config.get('random_seed', 182675),
         n_folds=config.get('n_folds', 4),
         n_jobs=config.get('n_jobs', 1),
@@ -71,20 +68,13 @@ rule train_and_predict:
         svm_tol='-st ' + config.get('svm_tol', 1e-3) if 'svm_tol' in config else ''
     threads: config.get('n_jobs', 1)
     output:
-        summary=PREDICTION_SUMMARY_FMT,
-        data=PREDICTION_DATA_FMT,
+        summary=PREDICTION_SUMMARY_FMT
     shell:
-        '''
-        python train_and_predict.py \
-            -ff {input.src} {input.tgt} \
-            -n {params.names} \
-            -o {output.summary} \
-            -po {output.data} \
-            -rs {params.random_seed} \
-            -nj {params.n_jobs} -nf {params.n_folds} -ho {params.hold_out} \
-            {params.classifier} {params.n_trees} {params.max_depth} \
-            {params.svm_C} {params.svm_tol}
-        '''
+        'python train_and_predict.py -ff {input.tgt} {input.src} '\
+        '-n {params.names} -o {output.summary} -rs {params.random_seed} '\
+        '-nj {params.n_jobs} -nf {params.n_folds} -ho {params.hold_out} '\
+        '{params.classifier} {params.n_trees} {params.max_depth} '\
+        '{params.svm_C} {params.svm_tol}'
         
 # Construct features for the given SL dataset
 rule featurize:
@@ -114,9 +104,7 @@ rule embed:
         runtimes=RUNTIMES_FILE
     params:
         n_landmarks = config.get('n_landmarks'),
-        random_seed = config.get('random_seed', 182675),
-        tgt_lam = config.get(TGT).get('lambda', 0.05),
-        src_lam = config.get(SRC).get('lambda', 0.05)
+        random_seed = config.get('random_seed', 182675)
     log:
         '{}/{}-embed.log'.format(LOG_DIR, RUN_NAME)
     shell:
@@ -131,8 +119,6 @@ rule embed:
             --landmarks_output_file {output.landmarks} \
             --runtimes_file {output.runtimes} \
             --n_landmarks {params.n_landmarks} \
-            --random_seed {params.random_seed} \
-            --src_lam {params.src_lam} \
-            --tgt_lam {params.tgt_lam} \
+            --random_seed {params.random_seed}
             2>&1 | tee {log}
         '''
