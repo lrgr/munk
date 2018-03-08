@@ -13,6 +13,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-ff', '--feature_files', type=str, required=True, nargs=2)
 parser.add_argument('-n', '--names', type=str, required=True, nargs=2)
 parser.add_argument('-s2t', '--source_to_target', type=str, default=None, required=False)
+parser.add_argument('-s2t', '--source_to_target', type=str, default=None, required=False)
+parser.add_argument('-nozero', '--nozero', type=str, default=None, required=False)
 parser.add_argument('-v', '--verbosity', type=int, default=logging.INFO, required=False)
 
 args = parser.parse_args(sys.argv[1:])
@@ -40,9 +42,15 @@ import scipy as spy
 
 logger.info('[Starting processing]')
 
-# normalize each feature to zero mean and unit norm
-NC_S = preprocessing.scale(X_S, axis=0)
-NC_T = preprocessing.scale(X_T, axis=0)
+if args.nozero:
+    # normalize each feature to unit norm
+    # note that assumptions of coral don't apply in this case
+    NC_S = preprocessing.normalize(X_S, axis=0)
+    NC_T = preprocessing.normalize(X_T, axis=0)
+else:
+    # normalize each feature to zero mean and unit norm
+    NC_S = preprocessing.scale(X_S, axis=0)
+    NC_T = preprocessing.scale(X_T, axis=0)
 
 # compute covariances
 CC_S = np.cov(NC_S.T)
@@ -53,7 +61,13 @@ CS = CC_S + np.eye(*CC_S.shape)
 CT = CC_T + np.eye(*CC_T.shape)
 
 if args.source_to_target:
-    logger.warning('S2T not implemented')
+    # this is the recommended approach in the coral paper
+
+    logger.info('[performing source to target fitting]')
+    CS_sqrt = np.real_if_close(spy.linalg.sqrtm(CS))
+    DS = NC_S.dot(np.linalg.pinv(CS_sqrt))
+    NC_S = DS.dot(np.real_if_close(spy.linalg.sqrtm(CT)))
+
 else:
     # contrary to the coral paper we are 'fitting' the target distribution
     # into the source's distributional shape
