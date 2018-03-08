@@ -14,6 +14,7 @@ parser.add_argument('-ff', '--feature_files', type=str, required=True, nargs=2)
 parser.add_argument('-n', '--names', type=str, required=True, nargs=2)
 parser.add_argument('-s2t', '--source_to_target', type=str, default=None, required=False)
 parser.add_argument('-nozero', '--nozero', type=str, default=None, required=False)
+parser.add_argument('-renorm', '--renorm', type=str, default=None, required=False)
 parser.add_argument('-v', '--verbosity', type=int, default=logging.INFO, required=False)
 
 args = parser.parse_args(sys.argv[1:])
@@ -75,6 +76,10 @@ else:
     CT_sqrt = np.real_if_close(spy.linalg.sqrtm(CT))
     DT = NC_T.dot(np.linalg.pinv(CT_sqrt))
     NC_T = DT.dot(np.real_if_close(spy.linalg.sqrtm(CS)))
+
+if args.renorm:
+    NC_S = preprocessing.normalize(NC_S)
+    NC_T = preprocessing.normalize(NC_T)
 
 # Output to files
 # Rewriting existing files for now so I don't have to change the snakefile
