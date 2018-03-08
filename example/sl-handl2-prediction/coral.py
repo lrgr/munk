@@ -13,7 +13,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-ff', '--feature_files', type=str, required=True, nargs=2)
 parser.add_argument('-n', '--names', type=str, required=True, nargs=2)
 parser.add_argument('-s2t', '--source_to_target', type=str, default=None, required=False)
-parser.add_argument('-s2t', '--source_to_target', type=str, default=None, required=False)
 parser.add_argument('-nozero', '--nozero', type=str, default=None, required=False)
 parser.add_argument('-v', '--verbosity', type=int, default=logging.INFO, required=False)
 
