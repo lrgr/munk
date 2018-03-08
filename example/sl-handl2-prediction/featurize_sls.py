@@ -25,6 +25,8 @@ def get_parser():
     parser.add_argument('-of', '--output_file', type=str, required=True)
     parser.add_argument('-ff', '--feature_function', type=str, required=False,
                         default=ADD_FEATURES, choices=FEATURE_FUNCTIONS)
+    parser.add_argument('-norm', '--normalize', type=str, required=False,
+                        default=None)
     parser.add_argument('-v', '--verbosity', type=int, required=False,
                         default=logging.INFO)
     parser.add_argument('--sinatra-featurize', action='store_true', default=False)
@@ -104,6 +106,12 @@ def run( args ):
         def feature_function(p):
             u, v = sorted(p)
             return (embedding[nodeToIndex[u]] + embedding[nodeToIndex[v]])/2.
+
+    elif args.feature_function == TWO_D:
+        def feature_function(p):
+            u, v = sorted(p)
+            full = (embedding[nodeToIndex[u]] + embedding[nodeToIndex[v]])/2.
+            return(full[:2])
     else:
         raise NotImplementedError('Feature function "%s" not implemented' % args.feature_function)
         

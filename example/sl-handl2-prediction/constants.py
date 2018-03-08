@@ -8,7 +8,8 @@ INCONCLUSIVE = 'Inconclusive'
 # Feature functions
 ADD_FEATURES = 'add'
 MEAN_FEATURES = 'mean'
-FEATURE_FUNCTIONS = { ADD_FEATURES, MEAN_FEATURES }
+TWO_D = 'two_d'
+FEATURE_FUNCTIONS = { ADD_FEATURES, MEAN_FEATURES, TWO_D }
 
 # Cross-validation choices
 GENES = 'genes'

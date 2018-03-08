@@ -120,5 +120,4 @@ rule embed:
             --runtimes_file {output.runtimes} \
             --n_landmarks {params.n_landmarks} \
             --random_seed {params.random_seed}
-            2>&1 | tee {log}
         '''
