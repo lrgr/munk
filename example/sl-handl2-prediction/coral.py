@@ -57,8 +57,9 @@ CC_S = np.cov(NC_S.T)
 CC_T = np.cov(NC_T.T)
 
 # regularize (one could add a parameter here)
-CS = CC_S + np.eye(*CC_S.shape)
-CT = CC_T + np.eye(*CC_T.shape)
+lamb = 0.
+CS = CC_S + lamb * np.eye(*CC_S.shape)
+CT = CC_T + lamb * np.eye(*CC_T.shape)
 
 if args.source_to_target:
     # this is the recommended approach in the coral paper
@@ -76,6 +77,10 @@ else:
     CT_sqrt = np.real_if_close(spy.linalg.sqrtm(CT))
     DT = NC_T.dot(np.linalg.pinv(CT_sqrt))
     NC_T = DT.dot(np.real_if_close(spy.linalg.sqrtm(CS)))
+
+if lamb == 0.0:
+    NC_T = np.real(NC_T)
+    NC_S = np.real(NC_S)
 
 if args.renorm:
     NC_S = preprocessing.normalize(NC_S, axis=0)
