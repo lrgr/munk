@@ -78,8 +78,8 @@ else:
     NC_T = DT.dot(np.real_if_close(spy.linalg.sqrtm(CS)))
 
 if args.renorm:
-    NC_S = preprocessing.normalize(NC_S)
-    NC_T = preprocessing.normalize(NC_T)
+    NC_S = preprocessing.normalize(NC_S, axis=0)
+    NC_T = preprocessing.normalize(NC_T, axis=0)
 
 # Output to files
 # Rewriting existing files for now so I don't have to change the snakefile
