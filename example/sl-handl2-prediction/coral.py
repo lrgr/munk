@@ -83,8 +83,8 @@ if lamb == 0.0:
     NC_S = np.real(NC_S)
 
 if args.renorm:
-    NC_S = preprocessing.normalize(NC_S, axis=0)
-    NC_T = preprocessing.normalize(NC_T, axis=0)
+    NC_S = preprocessing.scale(NC_S, axis=0)
+    NC_T = preprocessing.scale(NC_T, axis=0)
 
 # Output to files
 # Rewriting existing files for now so I don't have to change the snakefile
