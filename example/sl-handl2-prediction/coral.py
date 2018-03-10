@@ -57,7 +57,7 @@ else:
 
 # compute covariances of features
 CC_S = NC_S.T @ NC_S
-CC_T = NC_T.T @ NC_S
+CC_T = NC_T.T @ NC_T
 
 # regularize (one could add a parameter here)
 lamb = 0.00001
