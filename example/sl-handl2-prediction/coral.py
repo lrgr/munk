@@ -89,6 +89,10 @@ if args.renorm:
     NC_S = preprocessing.scale(NC_S, axis=0)
     NC_T = preprocessing.scale(NC_T, axis=0)
 
+# new approach: make sure still centered
+NC_S = centering_matrix(X_S.shape[0]) @ NC_S
+NC_T = centering_matrix(X_T.shape[0]) @ NC_S
+
 # Output to files
 # Rewriting existing files for now so I don't have to change the snakefile
 output = dict(X=NC_S, y=y_S, pairs=S_pairs, params=S_args)
