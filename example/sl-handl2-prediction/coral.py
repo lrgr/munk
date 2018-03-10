@@ -42,22 +42,25 @@ import scipy as spy
 
 logger.info('[Starting processing]')
 
+def centering_matrix(n):
+    return np.eye(n) - 1/float(n) * np.ones((n,n))
+
 if args.nozero:
     # normalize each feature to unit norm
     # note that assumptions of coral don't apply in this case
     NC_S = preprocessing.normalize(X_S, axis=0)
     NC_T = preprocessing.normalize(X_T, axis=0)
 else:
-    # normalize each feature to zero mean and unit norm
-    NC_S = preprocessing.scale(X_S, axis=0)
-    NC_T = preprocessing.scale(X_T, axis=0)
+    # new approach: only center (do not rescale) each feature
+    NC_S = centering_matrix(X_S.shape[0]) @ X_S
+    NC_T = centering_matrix(X_T.shape[0]) @ X_T
 
-# compute covariances
-CC_S = np.cov(NC_S.T)
-CC_T = np.cov(NC_T.T)
+# compute covariances of features
+CC_S = NC_S.T @ NC_S
+CC_T = NC_T.T @ NC_S
 
 # regularize (one could add a parameter here)
-lamb = 0.
+lamb = 0.00001
 CS = CC_S + lamb * np.eye(*CC_S.shape)
 CT = CC_T + lamb * np.eye(*CC_T.shape)
 
