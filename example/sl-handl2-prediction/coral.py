@@ -91,7 +91,7 @@ if args.renorm:
 
 # new approach: make sure still centered
 NC_S = centering_matrix(X_S.shape[0]) @ NC_S
-NC_T = centering_matrix(X_T.shape[0]) @ NC_S
+NC_T = centering_matrix(X_T.shape[0]) @ NC_T
 
 # Output to files
 # Rewriting existing files for now so I don't have to change the snakefile
