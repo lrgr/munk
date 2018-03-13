@@ -1,5 +1,6 @@
 import sys, os, argparse, numpy as np, logging, pandas as pd
 from sklearn.externals import joblib
+import sklearn
 from copy import deepcopy
 
 # Load our modules
