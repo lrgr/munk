@@ -42,9 +42,6 @@ import scipy as spy
 
 logger.info('[Starting processing]')
 
-def centering_matrix(n):
-    return np.eye(n) - 1/float(n) * np.ones((n,n))
-
 if args.nozero:
     # normalize each feature to unit norm
     # note that assumptions of coral don't apply in this case
@@ -52,14 +49,14 @@ if args.nozero:
     NC_T = preprocessing.normalize(X_T, axis=0)
 else:
     # new approach: only center (do not rescale) each feature
-    NC_S = centering_matrix(X_S.shape[0]) @ X_S
-    NC_T = centering_matrix(X_T.shape[0]) @ X_T
+    NC_S = sklearn.preprocessing.scale(X_S, axis = 0, with_std = False)
+    NC_T = sklearn.preprocessing.scale(X_T, axis = 0, with_std = False)
 
 # compute covariances of features
-CC_S = NC_S.T @ NC_S
-CC_T = NC_T.T @ NC_T
+CC_S = np.cov(NC_S.T)
+CC_T = np.cov(NC_T.T)
 
-# regularize (one could add a parameter here)
+# regularize 
 lamb = 0.00001
 CS = CC_S + lamb * np.eye(*CC_S.shape)
 CT = CC_T + lamb * np.eye(*CC_T.shape)
@@ -90,8 +87,9 @@ if args.renorm:
     NC_T = preprocessing.scale(NC_T, axis=0)
 
 # new approach: make sure still centered
-NC_S = centering_matrix(X_S.shape[0]) @ NC_S
-NC_T = centering_matrix(X_T.shape[0]) @ NC_T
+NC_S = preprocessing.scale(NC_S, axis=0, with_std = False)
+NC_T = preprocessing.scale(NC_T, axis=0, with_std = False)
+
 
 # Output to files
 # Rewriting existing files for now so I don't have to change the snakefile
