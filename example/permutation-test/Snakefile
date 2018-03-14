@@ -1,53 +1,94 @@
 import os
-GEN_RANDOM_NETWORKS = '../../src/gen_random_networks.py'
-networks_dir_template = '{}/{}-networks'
-A_networks_dir = networks_dir_template.format(config['output_dir'], config['A_species'])
-B_networks_dir = networks_dir_template.format(config['output_dir'], config['B_species'])
+GEN_RANDOM_NETWORK = '../../src/gen_random_network.py'
+PERMTEST = '../../src/permtest.py'
+SPECIES_A, SPECIES_B = config['A_species'], config['B_species']
+OUTPUT_DIR = '{}-{}'.format(SPECIES_A, SPECIES_B)
+networks_dir_template = OUTPUT_DIR + '/{}-networks'
+A_networks_dir = networks_dir_template.format(SPECIES_A)
+B_networks_dir = networks_dir_template.format(SPECIES_B)
 
 network_list_template = '{}/{}-networks.tsv'
-A_network_list = network_list_template.format(A_networks_dir, config['A_species'])
-B_network_list = network_list_template.format(B_networks_dir, config['B_species'])
+A_network_list = network_list_template.format(A_networks_dir, SPECIES_A)
+B_network_list = network_list_template.format(B_networks_dir, SPECIES_B)
+
+network_template = '{out_dir}/{name}-networks/{name}-{i}.pkl'
+log_template = '{out_dir}/log/{name}-networks/{name}-{i}.log'
+results_template = '{out_dir}/{source_name}-to-{target_name}-permtest-results.json'
+diffs_template = '{out_dir}/{source_name}-to-{target_name}-permtest-diffs.pkl'
+perm_test_log_template = '{out_dir}/{source_name}-to-{target_name}-permtest.log'
 
 rule all:
     input:
-        A_network_list, B_network_list
+        expand([results_template, diffs_template], zip,\
+               out_dir = [OUTPUT_DIR] * 2, \
+               source_name = [SPECIES_A, SPECIES_B], \
+               target_name = [SPECIES_B, SPECIES_A])
 
-rule A_random_networks:
+rule permtest:
     input:
-        config['A_edgelist']
+        source_random_network_data = \
+            lambda w: \
+                expand(network_template, \
+                    out_dir=OUTPUT_DIR, \
+                    name=w.source_name, \
+                    i=range(config['n_permutations'])),
+
+        target_random_network_data = \
+            lambda w: \
+                expand(network_template, \
+                    out_dir=OUTPUT_DIR, \
+                    name=w.target_name, \
+                    i=range(config['n_permutations'])),
+
+        source_ppi = lambda w: config['edgelists'][w.source_name],
+
+        target_ppi = lambda w: config['edgelists'][w.target_name],
+        homologs = lambda w: \
+            config['homologs']['{}-{}'.format(w.source_name, w.target_name)]
     output:
-        A_network_list
+        json_results=results_template,
+        diffs=diffs_template
     params:
-        A_species = config['A_species'],
-        n_graphs = config['n_graphs'],
-        n_jobs = config['n_jobs']
+        n_landmarks = config['n_landmarks'], 
+        lam = config['lambda']
+    log:
+        perm_test_log_template
+    threads:
+       config['threads']
     shell:
         '''
-        time \
-        python {GEN_RANDOM_NETWORKS} \
-            -s {params.A_species} \
-            -e {input} \
-            -n {params.n_graphs} \
-            -d {A_networks_dir} \
-            -j {params.n_jobs} \
+        python {PERMTEST} \
+            -s {input.source_ppi}\
+            -t {input.target_ppi}\
+            -hom {input.homologs}\
+            -nl {params.n_landmarks}\
+            -lam {params.lam} \
+            -sf {input.source_random_network_data}\
+            -tf {input.target_random_network_data}\
+            -o {output.json_results} \
+            -dof {output.diffs} \
+            -j {threads} \
+        2>&1 | tee {log}
         '''
 
-rule B_random_networks:
+rule rand_networks:
     input:
-        config['B_edgelist']
+        expand(network_template, \
+                out_dir=OUTPUT_DIR, \
+                name=[SPECIES_A, SPECIES_B], \
+                i=range(config['n_permutations']))
+
+rule rand_network:
+    input:
+        lambda w: config['edgelists'][w.name]
     output:
-        B_network_list
+        network_template
     params:
-        B_species = config['B_species'],
-        n_graphs = config['n_graphs'],
-        n_jobs = config['n_jobs']
+        n_tries = config['n_tries']
+    log:
+        log_template
     shell:
         '''
-        time \
-        python {GEN_RANDOM_NETWORKS} \
-            -s {params.B_species} \
-            -e {input} \
-            -n {params.n_graphs} \
-            -d {B_networks_dir} \
-            -j {params.n_jobs} \
+        python {GEN_RANDOM_NETWORK} -e {input} -o {output} -nt {params.n_tries}
         '''
+        

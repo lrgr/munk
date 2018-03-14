@@ -1,0 +1,14 @@
+A_species: sp
+B_species: sc
+edgelists:
+    sc: ../../data/ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi-std.tsv
+    sp: ../../data/ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi-std.tsv
+homologs:
+    sc-sp: ../../data/homologs/sc-sp/sc-sp-homologs.txt
+    sp-sc: ../../data/homologs/sc-sp/sp-sc-homologs.txt
+n_permutations: 1000
+n_landmarks: 400
+lambda: 0.05
+
+n_tries: 50
+threads: 24

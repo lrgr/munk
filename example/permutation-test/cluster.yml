@@ -1,0 +1,7 @@
+__default__:
+    qos: high_throughput
+    time: 01:00:00
+    cpu: 4
+    mem: 2G
+    out: '{rule}.{wildcards.out_dir}/logs/slurm/{rule}/{wildcards}.out'
+    err: '{rule}.{wildcards.out_dir}/logs/slurm/{rule}/{wildcards}.err'

@@ -4,20 +4,20 @@ import networkx as nx
 import numpy as np
 
 import util
+from handl import regularized_laplacian, rkhs_factor
 
 from collections import defaultdict
 from sklearn.externals import joblib
 from sklearn.externals.joblib import Parallel, delayed
 from i_o import get_logger
+from time import time
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--species_name', type=str, required=True)
-    parser.add_argument('-n', '--n_graphs', type=int, required=True)
     parser.add_argument('-e', '--edgelist', type=str, required=True)
-    parser.add_argument('-d', '--output_dir', type=str, required=True)
-    parser.add_argument('-j', '--n_jobs', type=int, required=False, default=1)
+    parser.add_argument('-o', '--output', type=str, required=True)
+    parser.add_argument('-nt', '--n_tries', type=int, required=False, default=50)
     return parser.parse_args()
 
 def shuffle(arr):
@@ -27,14 +27,20 @@ def shuffle(arr):
     return arr_copy
 
 def get_degree_to_names(tuples):
-    ''' Returns dictionary of degrees to node names from given list of (name, deg) tuples '''
+    ''' 
+    Returns dictionary of degrees to node names from given list of 
+    (name, deg) tuples 
+    '''
     d = defaultdict(list)
     for  name, deg in tuples:
         d[deg].append(name)
     return d
 
 def get_degree_preserving_relabelling(new_name_dict, unlabeled_G):
-    ''' Returns name mapping given between degree to node names dictionary and unlabeled graph G'''
+    ''' 
+    Returns name mapping given between degree to node names dictionary 
+    and unlabeled graph G
+    '''
     old_degree_dict = get_degree_to_names(unlabeled_G.degree)
     mapping_tuples = []
     for deg, new_names in new_name_dict.items():
@@ -43,7 +49,10 @@ def get_degree_preserving_relabelling(new_name_dict, unlabeled_G):
     return dict(mapping_tuples)
 
 def perturbed_graph(seed_graph):
-    ''' Returns random graph with approximately the same degree distribution as given seed graph'''
+    ''' 
+    Returns random graph with approximately the same degree 
+    distribution as given seed graph
+    '''
     # Generate new graph with given degree sequence
     deg_sequence = shuffle(list(seed_graph.degree))
     new_G = nx.configuration_model(list(zip(*deg_sequence))[1])
@@ -57,38 +66,41 @@ def perturbed_graph(seed_graph):
     return util.simple_two_core(nx.Graph(new_G), verbose=False)
 
 def safe_perturbed_graph(seed_graph, n_tries=10):
-    for i in range(n_tries):
-        new_G = perturbed_graph(seed_graph)
-        if len(not_shared_nodes(new_G, seed_graph)) == 0:
-            return new_G
+    if n_tries > 0:
+        for i in range(n_tries):
+            new_G = perturbed_graph(seed_graph)
+            if len(not_shared_nodes(new_G, seed_graph)) == 0:
+                return new_G, i + 1
     raise Exception()
 
 def not_shared_nodes(G1, G2):
     return set(G1.nodes) ^ set(G2.nodes)
 
-def gen_and_save_random_network(fp, seed_graph, n_tries=10):
-	log = get_logger()
-	random_graph = safe_perturbed_graph(seed_graph, n_tries)
-	log.info('Saving random network to: %s', fp)
-	joblib.dump(random_graph, fp)
-
+def gen_random_network_data(seed_graph, n_tries=10):
+    log = get_logger()
+    random_graph, tries = safe_perturbed_graph(seed_graph, n_tries)
+    nodes = sorted(random_graph.nodes())
+    D = regularized_laplacian(random_graph, nodes, lam=0.05)
+    C = rkhs_factor(D)
+    return dict(G=random_graph, D=D, C=C, nodes=nodes), tries
 
 def main(args):
-	log = get_logger()
-	log.info('Loading edgelist from: %s', args.edgelist)
-	log.info('Saving random networks to directory: %s', args.output_dir)
-	log.info('Generating %d networks', args.n_graphs)
+    log = get_logger()
+    log.info('Loading edgelist from: %s', args.edgelist)
+    seed_network = \
+        util.simple_two_core(nx.read_edgelist(args.edgelist, encoding='ascii'),
+                             verbose=False)
 
-	filenames = ['{}{}.pkl'.format(args.species_name, i) for i in range(args.n_graphs)]
-	filepaths = ['{}/{}'.format(args.output_dir, filename) for filename in filenames]
+    log.info('Generating network...')
+    t_start = time()
+    data, tries = gen_random_network_data(seed_network, args.n_tries)
+    t_end = time()
+    elapsed = t_end - t_start
+    log.info('Random network generated in %.2f, in %d tries', elapsed, tries)
 
-	seed_network = util.simple_two_core(nx.read_edgelist(args.edgelist, encoding='ascii'), verbose=False)
-	Parallel(n_jobs=args.n_jobs)(
-			delayed(gen_and_save_random_network)(fp, seed_network) for fp in filepaths)
+    log.info('Saving random network to: %s', args.output)
+    joblib.dump(data, args.output)
 
-	with open('{}/{}-networks.tsv'.format(args.output_dir, args.species_name),'w') as OUT:
-		for fname in filenames:
-  			OUT.write("%s\n" % fname)
 
 if __name__ == '__main__':
-	main(parse_args())
+    main(parse_args())

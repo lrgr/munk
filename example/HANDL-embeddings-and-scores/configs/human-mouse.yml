@@ -1,7 +1,0 @@
-species-A: human
-species-B: mouse
-A-ppi: ../../data/ppi/string-v9.1/human/ensembl-human-network.txt
-B-ppi: ../../data/ppi/string-v9.1/mouse/ensembl-mouse-network.txt
-A-to-B-homologs: ../../data/homologs/human-mouse/human-mouse-homologs.txt
-B-to-A-homologs: ../../data/homologs/human-mouse/mouse-human-homologs.txt
-n_landmarks: 400

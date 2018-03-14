@@ -14,6 +14,60 @@ import util
 from i_o import get_logger
 
 ###############################################################################
+# utility to seperate scores
+###############################################################################
+
+def separate_scores(scores, landmark_pair_idxs, homolog_pair_idxs):
+    ''' 
+    Separate scores into the following 5 categories:
+        1. Landmark - Landmark pair scores
+        2. Off diagonal entries in the landmark-landmark submatrix
+        3. Landmark- (non-landmark) entries in rows and columns that correspond
+           to one landmark
+        4. Homolog-homolog pairs
+        5. Other pairs
+    '''
+    source_landmark_idxs, target_landmark_idxs = zip(*landmark_pair_idxs)
+    source_homolog_idxs, target_homolog_idxs = zip(*homolog_pair_idxs)
+    landmark_mask = np.zeros_like(scores, dtype=bool)
+    
+    source_landmark_target_all_mask = np.zeros_like(scores, dtype=bool)
+    source_landmark_target_all_mask[source_landmark_idxs, :]  = True
+    source_all_target_landmark_mask = np.zeros_like(scores, dtype=bool)
+    source_all_target_landmark_mask[:, target_landmark_idxs]  = True
+    landmark_landmark_mask = np.zeros_like(scores, dtype=bool) 
+    landmark_landmark_mask[source_landmark_idxs, target_landmark_idxs] = True
+    
+    # Obtain landmark-landmark pairs
+    L_L_diag_scores = scores[source_landmark_idxs, target_landmark_idxs]
+    
+    # Obtain landmark-landmark off diag pairs
+    L_L_off_diag_mask = np.logical_and(source_landmark_target_all_mask, source_all_target_landmark_mask)
+    L_L_off_diag_mask &= ~landmark_landmark_mask
+    L_L_off_diag_scores = scores[L_L_off_diag_mask]
+    
+    # Landmark - Non-landmark pairs
+    L_non_L_mask = source_landmark_target_all_mask ^ source_all_target_landmark_mask
+    L_non_L_scores = scores[L_non_L_mask]
+    
+    # Hom - Hom pairs
+    H_H_mask = np.zeros_like(scores, dtype=bool)
+    H_H_mask[source_homolog_idxs, target_homolog_idxs] = True
+    H_H_mask[source_landmark_idxs, target_landmark_idxs] = False
+    H_H_scores = scores[H_H_mask]
+    
+    # Obtain other scores
+    other_mask = np.ones_like(scores, dtype=np.bool)
+    other_mask &= ~(source_landmark_target_all_mask | source_all_target_landmark_mask | H_H_mask )
+    other_scores = scores[other_mask] 
+
+    return L_L_diag_scores,\
+           L_L_off_diag_scores,\
+           L_non_L_scores,\
+           H_H_scores,\
+            other_scores
+
+###############################################################################
 # DIFFUSION MEASURES
 ###############################################################################
 
