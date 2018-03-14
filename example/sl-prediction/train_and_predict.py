@@ -189,6 +189,10 @@ for s_name in ['Source', 'Target']:
         
 results.append(average_result)
 
+logger.info('- Average')
+logger.info('\t- {0}->{0}: {1}'.format(A_name, format_result(average_result['Source'])))
+logger.info('\t- {0}->{1}: {2}'.format(A_name, B_name, format_result(average_result['Target'])))
+
 # Flatten results
 flat_results = []
 for r in results:

@@ -94,7 +94,7 @@ def non_landmark_idxs(n, landmark_idxs):
 # HANDL embedding
 ###############################################################################
 
-def handl_embed_matrices(source_C, target_D, landmark_idxs):
+def handl_embed_matrices(source_C, target_D, landmark_idxs, normalize=False):
     ''' 
     Computes HANDL embeddings of source and target matrices given corresponding
     indices of landmarks
@@ -108,16 +108,17 @@ j
     source_idxs, target_idxs = zip(*landmark_idxs)
     target_C_hat = np.linalg.pinv(source_C[source_idxs,:]) \
                     .dot(target_D[target_idxs,:]).T
-        
-    source_non_landmark_idxs = non_landmark_idxs(len(source_C), source_idxs)
-    target_non_landmark_idxs = non_landmark_idxs(len(target_D), target_idxs)
-    target_C_hat[target_non_landmark_idxs] /= np.mean(np.linalg.norm(target_C_hat[target_non_landmark_idxs, :], axis=1))
-    target_C_hat[target_non_landmark_idxs] /= np.mean(np.linalg.norm(target_C_hat[target_idxs, :], axis=1))
+    
+    if normalize:
+        source_non_landmark_idxs = non_landmark_idxs(len(source_C), source_idxs)
+        target_non_landmark_idxs = non_landmark_idxs(len(target_D), target_idxs)
+        target_C_hat[target_non_landmark_idxs] /= np.mean(np.linalg.norm(target_C_hat[target_non_landmark_idxs, :], axis=1))
+        target_C_hat[target_non_landmark_idxs] /= np.mean(np.linalg.norm(target_C_hat[target_idxs, :], axis=1))
 
     return source_C, target_C_hat
 
 def handl_embed_graphs(source_G, target_G, homologs, n_landmarks, 
-                       src_lam=0.05, tgt_lam=0.05, return_idxs=False):
+                       src_lam=0.05, tgt_lam=0.05, return_idxs=False, normalize=False):
     '''
     Computes HANDL embeddings of given source and target graphs with given
     list homologs and number of landmarks
@@ -159,7 +160,7 @@ def handl_embed_graphs(source_G, target_G, homologs, n_landmarks,
                      s_n, t_n in landmark_homs]
 
     t_start = time.time()
-    source_C, target_C_hat = handl_embed_matrices(source_C, target_D, landmark_idxs)
+    source_C, target_C_hat = handl_embed_matrices(source_C, target_D, landmark_idxs, normalize=normalize)
     t_end = time.time()
     handl_time = t_end - t_start
 
