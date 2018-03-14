@@ -10,13 +10,17 @@ TGT_SPECIES = config.get(TGT).get('name')
 NAME_TO_SPECIES = { SRC_SPECIES: SRC, TGT_SPECIES: TGT }
 
 DATASET_NAME = config.get('dataset_name')
-RUN_NAME = '-'.join([DATASET_NAME, SRC_SPECIES, TGT_SPECIES])
 
 WITH_LANDMARKS = 'w_landmarks'
 NO_LANDMARKS = 'no_landmarks'
 
 # Load required modules
 from os.path import join
+
+HANDL_VER_LOOKUP = {1: 'handl.py', 2: 'handl2.py'}
+HANDL_VER_NAME_LOOKUP = {1: 'HANDL', 2: 'HANDL2'}
+HANDL_NAME = HANDL_VER_NAME_LOOKUP[config.get('ver', 1)]
+RUN_NAME = '-'.join([HANDL_NAME, DATASET_NAME, SRC_SPECIES, TGT_SPECIES])
 
 # Directories
 SRC_CODE_DIR  = '../../src'
@@ -26,9 +30,9 @@ FEATURES_DIR = join(OUTPUT_DIR, 'features')
 LOG_DIR = join(OUTPUT_DIR, 'log')
 
 # Files
-HANDL = join(SRC_CODE_DIR, 'handl.py')
+HANDL = join(SRC_CODE_DIR, HANDL_VER_LOOKUP[config.get('ver', 1)])
 
-EMBEDDING_FORMAT_STR = '%s/{name}-HANDL-embedding.pkl' % EMBEDDINGS_DIR
+EMBEDDING_FORMAT_STR = '%s/{name}-%s-embedding.pkl' % (EMBEDDINGS_DIR, HANDL_NAME)
 SRC_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=SRC_SPECIES)
 TGT_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=TGT_SPECIES)
 
@@ -36,9 +40,9 @@ FEATURE_FORMAT_STR = '%s/{name}-features-{landmarks}.pkl' % FEATURES_DIR
 SRC_FEATURES = FEATURE_FORMAT_STR.format(name=SRC_SPECIES, landmarks='{landmarks}')
 TGT_FEATURES = FEATURE_FORMAT_STR.format(name=TGT_SPECIES, landmarks='{landmarks}')
 
-SIM_SCORES = '{}/{}-HANDL-similarity-scores.pkl'.format(OUTPUT_DIR, RUN_NAME)
-LANDMARKS = '{}/{}-HANDL-landmarks.tsv'.format(OUTPUT_DIR, RUN_NAME)
-RUNTIMES_FILE = '{}/{}-HANDL-runtimes.tsv'.format(OUTPUT_DIR, RUN_NAME)
+SIM_SCORES = '{}/{}-{}-similarity-scores.pkl'.format(OUTPUT_DIR, RUN_NAME, HANDL_NAME)
+LANDMARKS = '{}/{}-{}-landmarks.tsv'.format(OUTPUT_DIR, RUN_NAME, HANDL_NAME)
+RUNTIMES_FILE = '{}/{}-{}-runtimes.tsv'.format(OUTPUT_DIR, RUN_NAME, HANDL_NAME)
 
 PREDICTION_SUMMARY_FMT = join(OUTPUT_DIR, '{}-prediction-summary-{{hold_out}}-{{landmarks}}.tsv'.format(RUN_NAME))
 PREDICTION_DATA_FMT = join(OUTPUT_DIR, '{}-prediction-data-{{hold_out}}-{{landmarks}}.pkl'.format(RUN_NAME))

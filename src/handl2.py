@@ -100,7 +100,13 @@ def rkhs_factor(D):
     e, v = sp.linalg.eigh(D)
     return v.dot(np.diag(np.sqrt(e)))
 
-def handl2_embed_graphs(source_G, target_G, homologs, n_landmarks, lam=0.05, return_idxs=False):
+def handl2_embed_graphs(source_G, 
+                        target_G, 
+                        homologs, 
+                        n_landmarks, 
+                        src_lam=0.05, 
+                        tgt_lam=0.05,
+                        return_idxs=False):
     '''
     Computes HANDL embeddings of given source and target graphs with given
     list homologs and number of landmarks
@@ -120,7 +126,7 @@ def handl2_embed_graphs(source_G, target_G, homologs, n_landmarks, lam=0.05, ret
     target_nodes = util.sorted_nodes(target_G)
 
     t_start = time.time()
-    source_D = regularized_laplacian(source_G, source_nodes, lam)
+    source_D = regularized_laplacian(source_G, source_nodes, src_lam)
     t_end = time.time()
     source_laplacian_time = t_end - t_start
 
@@ -130,7 +136,7 @@ def handl2_embed_graphs(source_G, target_G, homologs, n_landmarks, lam=0.05, ret
     source_rkhs_time = t_end - t_start 
 
     t_start = time.time()
-    target_D = regularized_laplacian(target_G, target_nodes, lam)
+    target_D = regularized_laplacian(target_G, target_nodes, tgt_lam)
     t_end = time.time()
     target_laplacian_time = t_end - t_start
 
@@ -191,6 +197,8 @@ def parse_args():
     parser.add_argument('-r', '--runtimes_file', type=str, required=True)
     parser.add_argument('-n', '--n_landmarks', type=int, required=False, default=400)
     parser.add_argument('-rs', '--random_seed', type=int, required=False, default=28791)
+    parser.add_argument('--src_lam', type=float, required=False, default=0.05)
+    parser.add_argument('--tgt_lam', type=float, required=False, default=0.05)
     return parser.parse_args()
 
 def main(args):
@@ -219,7 +227,8 @@ def main(args):
 
     t_start = time.time()
     source_data, target_data, landmarks, runtimes = \
-        handl2_embed_graphs(source_G, target_G, homologs, n_landmarks)
+        handl2_embed_graphs(source_G, target_G, homologs, n_landmarks,
+                            src_lam=args.src_lam, tgt_lam=args.tgt_lam)
     t_end = time.time()
     total_time = t_end - t_start
     source_X, source_nodes = source_data
