@@ -17,7 +17,7 @@ NO_LANDMARKS = 'no_landmarks'
 # Load required modules
 from os.path import join
 
-HANDL_VER_LOOKUP = {1: 'handl.py', 2: 'handl2.py'}
+HANDL_VER_LOOKUP = {1: 'handl.py', 2: 'handl_diagonal_norm.py'}
 HANDL_VER_NAME_LOOKUP = {1: 'HANDL', 2: 'HANDL2'}
 HANDL_NAME = HANDL_VER_NAME_LOOKUP[config.get('ver', 1)]
 RUN_NAME = '-'.join([HANDL_NAME, DATASET_NAME, SRC_SPECIES, TGT_SPECIES])

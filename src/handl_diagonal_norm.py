@@ -20,7 +20,7 @@ def non_landmark_idxs(n, landmark_idxs):
 def handl2_embed_matrices(source_C, target_D, landmark_idxs):
     ''' 
     Computes HANDL embeddings of source and target matrices given corresponding
-    indices of landmarks
+    indices of landmarks WITHOUT regressing to values on the diagonal!
 
     :param source_C: 2D array of rkhs vectors from source species
     :param source_D: 2D array of diffusion values from target species
