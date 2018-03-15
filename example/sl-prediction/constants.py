@@ -13,3 +13,7 @@ FEATURE_FUNCTIONS = { ADD_FEATURES, MEAN_FEATURES }
 # Cross-validation choices
 GENES = 'genes'
 GENE_PAIRS = 'pairs'
+
+# Normalization choices
+CORAL_NORM = 'coral'
+NONE_NORM  = 'none'

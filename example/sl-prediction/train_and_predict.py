@@ -27,16 +27,18 @@ parser.add_argument('-nj', '--n_jobs', type=int, default=1, required=False)
 parser.add_argument('-ho', '--hold-out', type=str, choices=[GENE_PAIRS, GENES],
                     default=GENE_PAIRS, required=False)
 parser.add_argument('-po', '--predictions_output_file', type=str, required=True)
+parser.add_argument('--coral', action='store_true', default=False, required=False)
 
 # Add classifier choices with subparsers
 subparser = parser.add_subparsers(dest='classifier', help='Classifier')
 rf_parser = subparser.add_parser('rf')
 rf_parser.add_argument('-md', '--max_depth', type=int, default=None, required=False)
-rf_parser.add_argument('-nt', '--n_trees', type=int, default=100, required=False)
+rf_parser.add_argument('-nt', '--n_trees', type=int, nargs='*', required=False,
+                       default=[10, 100, 250, 500])
 
 svm_parser = subparser.add_parser('svm')
 svm_parser.add_argument('-sc', '--svm_Cs', type=float, required=False, nargs='*',
-                        default=[0.01, 0.1, 1, 10, 50, 75, 100, 1000, 10000])
+                        default=[0.01, 0.1, 1, 10, 100, 1000, 10000])
 svm_parser.add_argument('-st', '--svm_tolerance', type=float, default=1e-3, required=False)
 
 args = parser.parse_args(sys.argv[1:])
@@ -119,18 +121,22 @@ def data_producer(random_state):
             y_train, y_test = y_A[train_index], y_A[test_index]
 
             # Increment random state
-            random_state += 1
+            random_state += 2
 
             yield i+1, pairs_train, X_train, y_train, pairs_test, X_test, y_test, random_state
 
 def train_and_predict(fold, _pairs_train, _X_train, _y_train, _pairs_test, _X_test, _y_test, _random_state):
+    inner_cv = KFold(n_splits=args.n_inner_folds, random_state=_random_state, shuffle=True)
     # Random forest
     if args.classifier == 'rf':
         # Train the random forest
-        clf = RandomForestClassifier(n_estimators=args.n_trees, max_depth=args.max_depth,
-                                     random_state=_random_state,
-                                     n_jobs=args.n_jobs)
+        rf = RandomForestClassifier(n_estimators=args.n_trees, max_depth=args.max_depth,
+                                    random_state=_random_state+1,
+                                    n_jobs=args.n_jobs)
+        clf = GridSearchCV(rf, dict(n_estimators=args.n_trees), cv=inner_cv,
+                           refit=True, scoring='average_precision')
         clf.fit(_X_train, _y_train)
+        best_params = clf.best_params_
 
         # Make out-of-sample predictions
         y_test_hat = clf.predict_proba(_X_test)[:, 1]
@@ -139,11 +145,11 @@ def train_and_predict(fold, _pairs_train, _X_train, _y_train, _pairs_test, _X_te
     # SVM
     elif args.classifier == 'svm':
         # Train the Linear SVM
-        svc = LinearSVC(tol=args.svm_tolerance)
-        clf = GridSearchCV(svc, dict(C=args.svm_Cs), cv=args.n_inner_folds,
+        svc = LinearSVC(tol=args.svm_tolerance, random_state=_random_state+1)
+        clf = GridSearchCV(svc, dict(C=args.svm_Cs), cv=inner_cv,
                            refit=True, scoring='average_precision')
         clf.fit(_X_train, _y_train)
-        print(clf.best_params_)
+        best_params = clf.best_params_
 
         # Make out of sample predictions. Decision function outputs
         # a single list of values for binary class data.
@@ -172,7 +178,7 @@ def train_and_predict(fold, _pairs_train, _X_train, _y_train, _pairs_test, _X_te
         "Train size": len(_y_train),
         "Test size": len(_y_test),
     }
-    logger.info('- Fold: {}'.format(fold))
+    logger.info('- Fold: {} ({})'.format(fold, str(best_params)))
     logger.info('\t- {0}->{0}: {1}'.format(A_name, format_result(result['Source'])))
     logger.info('\t- {0}->{1}: {2}'.format(A_name, B_name, format_result(result['Target'])))
     

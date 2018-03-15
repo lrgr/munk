@@ -17,7 +17,8 @@ NO_LANDMARKS = 'no_landmarks'
 # Load required modules
 from os.path import join
 
-RUN_NAME = '-'.join([DATASET_NAME, SRC_SPECIES, TGT_SPECIES])
+RUN_NAME  = '-'.join([DATASET_NAME, SRC_SPECIES, TGT_SPECIES])
+RUN_NAME += '-coral' if config.get('normalization') == 'coral' else ''
 
 # Directories
 SRC_CODE_DIR  = '../../src'
@@ -31,6 +32,7 @@ HANDL = join(SRC_CODE_DIR, 'handl.py')
 
 EMBEDDING_FORMAT_STR = '%s/{name}-HANDL-embedding.pkl' % (EMBEDDINGS_DIR)
 SRC_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=SRC_SPECIES)
+RAW_SRC_EMBEDDING = '%s/%s-HANDL-embedding-raw.pkl' % (EMBEDDINGS_DIR, SRC_SPECIES)
 TGT_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=TGT_SPECIES)
 
 FEATURE_FORMAT_STR = '%s/{name}-features-{landmarks}.pkl' % FEATURES_DIR
@@ -51,7 +53,6 @@ rule all:
     input:
         expand(PREDICTION_SUMMARY_FMT, hold_out=config.get('hold_outs'), landmarks=[WITH_LANDMARKS, NO_LANDMARKS]),
         expand(PREDICTION_DATA_FMT, hold_out=config.get('hold_outs'), landmarks=[WITH_LANDMARKS, NO_LANDMARKS])
-        
 
 # Train and predict
 rule train_and_predict:
@@ -65,10 +66,10 @@ rule train_and_predict:
         n_jobs=config.get('n_jobs', 1),
         hold_out=lambda wildcards: wildcards.get('hold_out'),
         classifier=config.get('classifier', 'svm'),
-        n_trees='-nt ' + config.get('n_trees', 100) if 'n_trees' in config else '',
+        n_trees='-nt ' + config.get('n_trees') if 'n_trees' in config else '',
         max_depth='-md ' + config.get('max_depth') if 'max_depth' in config else '',
-        svm_C='-sc ' + config.get('svm_C', 1.0) if 'svm_C' in config else '',
-        svm_tol='-st ' + config.get('svm_tol', 1e-3) if 'svm_tol' in config else ''
+        svm_C='-sc ' + config.get('svm_C') if 'svm_C' in config else '',
+        svm_tol='-st ' + config.get('svm_tol') if 'svm_tol' in config else ''
     threads: config.get('n_jobs', 1)
     output:
         summary=PREDICTION_SUMMARY_FMT,
@@ -100,6 +101,19 @@ rule featurize:
         'python featurize_sls.py -ef {input.embedding} -gif {input.gis} '\
         '-o {output} {params.sinatra_featurize} {params.remove_landmarks}'
 
+# Run normalization (if necessary)
+rule normalize:
+    input:
+        src_embedding=RAW_SRC_EMBEDDING,
+        tgt_embedding=TGT_EMBEDDING
+    params:
+        norm=config.get('normalization', 'none')
+    output:
+        SRC_EMBEDDING
+    shell:
+        'python normalize_embedding.py -sf {input.src_embedding} '\
+        '-tf {input.tgt_embedding} -o {output} -n {params.norm}'
+        
 # Construct embeddings
 rule embed:
     input:
@@ -107,7 +121,7 @@ rule embed:
         tgt_ppi=config.get(TGT).get('ppi'),
         homologs = config.get(SRC).get('homologs').get(TGT)
     output:
-        src_embedding=SRC_EMBEDDING,
+        src_embedding=RAW_SRC_EMBEDDING,
         tgt_embedding=TGT_EMBEDDING,
         sim_scores=SIM_SCORES,
         landmarks=LANDMARKS,
