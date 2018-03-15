@@ -22,6 +22,7 @@ parser.add_argument('-o', '--output_file', type=str, required=True)
 parser.add_argument('-v', '--verbosity', type=int, default=logging.INFO, required=False)
 parser.add_argument('-rs', '--random_seed', type=int, default=1764, required=False)
 parser.add_argument('-nf', '--n_folds', type=int, default=4, required=False)
+parser.add_argument('-nif', '--n_inner_folds', type=int, default=3, required=False)
 parser.add_argument('-nj', '--n_jobs', type=int, default=1, required=False)
 parser.add_argument('-ho', '--hold-out', type=str, choices=[GENE_PAIRS, GENES],
                     default=GENE_PAIRS, required=False)
@@ -34,7 +35,8 @@ rf_parser.add_argument('-md', '--max_depth', type=int, default=None, required=Fa
 rf_parser.add_argument('-nt', '--n_trees', type=int, default=100, required=False)
 
 svm_parser = subparser.add_parser('svm')
-svm_parser.add_argument('-sc', '--svm_C', type=float, default=1.0, required=False)
+svm_parser.add_argument('-sc', '--svm_Cs', type=float, required=False, nargs='*',
+                        default=[0.01, 0.1, 1, 10, 50, 75, 100, 1000, 10000])
 svm_parser.add_argument('-st', '--svm_tolerance', type=float, default=1e-3, required=False)
 
 args = parser.parse_args(sys.argv[1:])
@@ -65,7 +67,7 @@ logger.info('- Species B (%s): %s samples x %s features (%s SLs)' % (B_name, X_B
 # Load the required modules
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import LinearSVC
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.metrics import average_precision_score, roc_auc_score, precision_recall_curve
 from itertools import permutations
 
@@ -137,8 +139,11 @@ def train_and_predict(fold, _pairs_train, _X_train, _y_train, _pairs_test, _X_te
     # SVM
     elif args.classifier == 'svm':
         # Train the Linear SVM
-        clf = LinearSVC(C=args.svm_C, tol=args.svm_tolerance)
+        svc = LinearSVC(tol=args.svm_tolerance)
+        clf = GridSearchCV(svc, dict(C=args.svm_Cs), cv=args.n_inner_folds,
+                           refit=True, scoring='average_precision')
         clf.fit(_X_train, _y_train)
+        print(clf.best_params_)
 
         # Make out of sample predictions. Decision function outputs
         # a single list of values for binary class data.
