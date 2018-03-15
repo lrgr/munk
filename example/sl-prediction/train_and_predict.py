@@ -25,6 +25,7 @@ parser.add_argument('-nf', '--n_folds', type=int, default=4, required=False)
 parser.add_argument('-nj', '--n_jobs', type=int, default=1, required=False)
 parser.add_argument('-ho', '--hold-out', type=str, choices=[GENE_PAIRS, GENES],
                     default=GENE_PAIRS, required=False)
+parser.add_argument('-po', '--predictions_output_file', type=str, required=True)
 
 # Add classifier choices with subparsers
 subparser = parser.add_subparsers(dest='classifier', help='Classifier')
@@ -50,9 +51,9 @@ a_data = joblib.load(args.feature_files[0])
 b_data = joblib.load(args.feature_files[1])
 
 X_A, y_A = np.array(a_data.get('X')), a_data.get('y')
-A_pairs, A_name = a_data.get('pairs'), args.names[0]
+A_pairs, A_name = np.asarray(a_data.get('pairs')), args.names[0]
 X_B, y_B = np.array(b_data.get('X')), b_data.get('y')
-B_pairs, B_name = b_data.get('pairs'), args.names[1]
+B_pairs, B_name = np.asarray(b_data.get('pairs')), args.names[1]
 
 # Log info about the data
 logger.info('- Species A (%s): %s samples x %s features (%s SLs)' % (A_name, X_A.shape[0], X_A.shape[1], int(y_A.sum())))
@@ -90,13 +91,14 @@ def data_producer(random_state):
     if args.hold_out == GENE_PAIRS:
         for i, (train_index, test_index) in enumerate(kf.split(X_A)):
             # Split up the source data
+            pairs_train, pairs_test = A_pairs[train_index], A_pairs[test_index]
             X_train, X_test = X_A[train_index], X_A[test_index]
             y_train, y_test = y_A[train_index], y_A[test_index]
 
             # Train the classifier within the source and predict within and across species
             random_state += 1
 
-            yield i+1, X_train, y_train, X_test, y_test, random_state
+            yield i+1, pairs_train, X_train, y_train, pairs_test, X_test, y_test, random_state
     elif args.hold_out == GENES:
         # Get a list of genes
         A_genes = sorted(set( g for p in A_pairs for g in p ))
@@ -110,14 +112,16 @@ def data_producer(random_state):
             test_index = sorted(A_pair_indices - set(train_index))
 
             # Split up the source data
+            pairs_train, pairs_test = A_pairs[train_index], A_pairs[test_index]
             X_train, X_test = X_A[train_index], X_A[test_index]
             y_train, y_test = y_A[train_index], y_A[test_index]
 
             # Increment random state
             random_state += 1
-            yield i+1, X_train, y_train, X_test, y_test, random_state
 
-def train_and_predict(fold, _X_train, _y_train, _X_test, _y_test, _random_state):
+            yield i+1, pairs_train, X_train, y_train, pairs_test, X_test, y_test, random_state
+
+def train_and_predict(fold, _pairs_train, _X_train, _y_train, _pairs_test, _X_test, _y_test, _random_state):
     # Random forest
     if args.classifier == 'rf':
         # Train the random forest
@@ -167,13 +171,14 @@ def train_and_predict(fold, _X_train, _y_train, _X_test, _y_test, _random_state)
     logger.info('\t- {0}->{0}: {1}'.format(A_name, format_result(result['Source'])))
     logger.info('\t- {0}->{1}: {2}'.format(A_name, B_name, format_result(result['Target'])))
     
-    return result
+    return result, (clf, _pairs_test, _y_test, y_test_hat, B_pairs, y_B, y_B_hat)
 
 # Train on A, predict on held-out A and B, executing in parallel
 logger.info('[Training and evaluating models]')
 from sklearn.externals.joblib import Parallel, delayed
 r = Parallel(n_jobs=min(args.n_folds, args.n_jobs), verbose=0)( delayed(train_and_predict)(*d) for d in data_producer(args.random_seed) )
-results = r
+results, clfs_and_preds = zip(*r)
+results = list(results)
 
 # Add an "average" row across folds, and report the current results
 average_result = deepcopy(results[-1])
@@ -183,6 +188,10 @@ for s_name in ['Source', 'Target']:
         average_result[s_name][measure] = np.mean([ r[s_name][measure] for r in results ])
         
 results.append(average_result)
+
+logger.info('- Average')
+logger.info('\t- {0}->{0}: {1}'.format(A_name, format_result(average_result['Source'])))
+logger.info('\t- {0}->{1}: {2}'.format(A_name, B_name, format_result(average_result['Target'])))
 
 # Flatten results
 flat_results = []
@@ -203,3 +212,18 @@ for r in results:
 df = pd.DataFrame(flat_results)[['Train', 'Test', 'Fold', 'F1', 'AUROC', 'AUPRC', 'Train size', 'Test size']]
 df = df.sort_values(['Train', 'Test', 'Fold'])
 df.to_csv(args.output_file, sep='\t', index=False)
+
+results_data = dict(summary=flat_results, data=[])
+
+for clf, pairs_test, y_test, y_test_hat, B_pairs, y_B, y_B_hat in clfs_and_preds:
+    results_data['data'].append(
+        dict(clf_type=args.classifier,
+             clf=clf,
+             pairs_test=pairs_test,
+             y_test=y_test,
+             y_test_hat=y_test_hat,
+             B_pairs=B_pairs,
+             y_B=y_B,
+             y_B_hat=y_B_hat))
+# Save SVM, and predictions to disk...
+joblib.dump(results_data, args.predictions_output_file)
