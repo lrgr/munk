@@ -16,7 +16,7 @@
 	}
     },
     "n_landmarks": 20,
-    "normalization": "coral",
+    "normalization": "coral-src",
     "dataset_name": "toy",
     "hold_outs": ["genes", "pairs"]
 }
