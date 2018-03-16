@@ -1,0 +1,23 @@
+{
+    "B": {
+	"name": "sc",
+	"ppi": "../../data/ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi-std.tsv",
+	"gi": "../../data/gi/collins/sc/collins-sc-emap-gis-std.tsv",
+	"homologs": {
+	    "A": "../../data/homologs/sc-sp/sc-sp-homologs.txt"
+	}
+    },
+    "A": {
+	"name": "sp",
+	"ppi": "../../data/ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi-std.tsv",
+	"gi": "../../data/gi/roguev/sp/roguev-sp-emap-gis-std.tsv",
+	"homologs": {
+	    "B": "../../data/homologs/sc-sp/sp-sc-homologs.txt"
+	}
+    },
+    "n_landmarks": 400,
+    "dataset_name": "roguev-collins",
+    "output_dir": "/scratch0/jfan03/HANDL/example/sl-prediction/output",
+    "n_jobs": 8,
+    "hold_outs": ["genes", "pairs"]
+}
