@@ -66,10 +66,10 @@ rule train_and_predict:
         n_jobs=config.get('n_jobs', 1),
         hold_out=lambda wildcards: wildcards.get('hold_out'),
         classifier=config.get('classifier', 'svm'),
-        n_trees='-nt ' + config.get('n_trees', 100) if 'n_trees' in config else '',
+        n_trees='-nt ' + config.get('n_trees') if 'n_trees' in config else '',
         max_depth='-md ' + config.get('max_depth') if 'max_depth' in config else '',
-        svm_C='-sc ' + config.get('svm_C', 1.0) if 'svm_C' in config else '',
-        svm_tol='-st ' + config.get('svm_tol', 1e-3) if 'svm_tol' in config else ''
+        svm_C='-sc ' + config.get('svm_C') if 'svm_C' in config else '',
+        svm_tol='-st ' + config.get('svm_tol') if 'svm_tol' in config else ''
     threads: config.get('n_jobs', 1)
     output:
         summary=PREDICTION_SUMMARY_FMT,

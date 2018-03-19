@@ -177,6 +177,7 @@ def train_and_predict(fold, _pairs_train, _X_train, _y_train, _pairs_test, _X_te
         "Fold": fold,
         "Train size": len(_y_train),
         "Test size": len(_y_test),
+        "Best params": str(best_params)
     }
     logger.info('- Fold: {} ({})'.format(fold, str(best_params)))
     logger.info('\t- {0}->{0}: {1}'.format(A_name, format_result(result['Source'])))
@@ -194,6 +195,7 @@ results = list(results)
 # Add an "average" row across folds, and report the current results
 average_result = deepcopy(results[-1])
 average_result['Fold'] = 'Average'
+average_result['Best params'] = 'N/A'
 for s_name in ['Source', 'Target']:
     for measure in ['AUPRC', 'AUROC', 'F1']:
         average_result[s_name][measure] = np.mean([ r[s_name][measure] for r in results ])
@@ -216,11 +218,12 @@ for r in results:
             "F1": r[ty]['F1'],
             "Fold": r['Fold'],
             "Train size": r['Train size'],
-            "Test size": r['Test size']
+            "Test size": r['Test size'],
+            "Best params", r['Best params']
         })
     
 # Output results to file
-df = pd.DataFrame(flat_results)[['Train', 'Test', 'Fold', 'F1', 'AUROC', 'AUPRC', 'Train size', 'Test size']]
+df = pd.DataFrame(flat_results)[['Train', 'Test', 'Fold', 'F1', 'AUROC', 'AUPRC', 'Train size', 'Test size', 'Best params']]
 df = df.sort_values(['Train', 'Test', 'Fold'])
 df.to_csv(args.output_file, sep='\t', index=False)
 

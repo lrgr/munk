@@ -22,20 +22,23 @@ parser.add_argument('-o', '--output_file', type=str, required=True)
 parser.add_argument('-v', '--verbosity', type=int, default=logging.INFO, required=False)
 parser.add_argument('-rs', '--random_seed', type=int, default=1764, required=False)
 parser.add_argument('-nf', '--n_folds', type=int, default=4, required=False)
+parser.add_argument('-nif', '--n_inner_folds', type=int, default=3, required=False)
 parser.add_argument('-nj', '--n_jobs', type=int, default=1, required=False)
 parser.add_argument('-ho', '--hold-out', type=str, choices=[GENE_PAIRS, GENES],
                     default=GENE_PAIRS, required=False)
-# TODO 
+#TODO 
 #parser.add_argument('-po', '--predictions_output_file', type=str, required=True)
 
 # Add classifier choices with subparsers
 subparser = parser.add_subparsers(dest='classifier', help='Classifier')
 rf_parser = subparser.add_parser('rf')
 rf_parser.add_argument('-md', '--max_depth', type=int, default=None, required=False)
-rf_parser.add_argument('-nt', '--n_trees', type=int, default=100, required=False)
+rf_parser.add_argument('-nt', '--n_trees', type=int, nargs='*', required=False,
+                       default=[10, 100, 250, 500])
 
 svm_parser = subparser.add_parser('svm')
-svm_parser.add_argument('-sc', '--svm_C', type=float, default=1.0, required=False)
+svm_parser.add_argument('-sc', '--svm_Cs', type=float, required=False, nargs='*',
+                        default=[0.01, 0.1, 1, 10, 100, 1000, 10000])
 svm_parser.add_argument('-st', '--svm_tolerance', type=float, default=1e-3, required=False)
 
 args = parser.parse_args(sys.argv[1:])
@@ -66,7 +69,7 @@ logger.info('- Species B (%s): %s samples x %s features (%s SLs)' % (B_name, X_B
 # Load the required modules
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import LinearSVC
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.metrics import average_precision_score, roc_auc_score, precision_recall_curve
 from itertools import permutations
 
@@ -87,6 +90,7 @@ def max_f1_score(_y_true, _y_hat):
     return max(f1s)
 
 # Helper functions to be used by Parallel to train/predict
+
 def data_producer(random_state):
     kf = KFold(n_splits=args.n_folds, random_state=random_state, shuffle=True)
     if args.hold_out == GENE_PAIRS:
@@ -144,7 +148,7 @@ def data_producer(random_state):
 
 
 def train_and_predict(fold, _A_data, _B_data, _random_state):
-
+    inner_cv = KFold(n_splits=args.n_inner_folds, random_state=_random_state, shuffle=True)
     # unpack data...
     _X_A_train, _X_A_test, _y_A_train, _y_A_test, _A_pairs_train, _A_pairs_test = _A_data
     _X_B_train, _X_B_test, _y_B_train, _y_B_test, _B_pairs_train, _B_pairs_test = _B_data
@@ -153,24 +157,31 @@ def train_and_predict(fold, _A_data, _B_data, _random_state):
     _X_train = np.concatenate((_X_A_train, _X_B_train))
     _y_train = np.concatenate((_y_A_train, _y_B_train))
 
-    ### TODO
     # Random forest
-    #if args.classifier == 'rf':
-    #    # Train the random forest
-    #    clf = RandomForestClassifier(n_estimators=args.n_trees, max_depth=args.max_depth,
-    #                                 random_state=_random_state,
-    #                                 n_jobs=args.n_jobs)
-    #    clf.fit(_X_train, _y_train)
+    if args.classifier == 'rf':
+        # Train the random forest
+        rf = RandomForestClassifier(n_estimators=args.n_trees, max_depth=args.max_depth,
+                                     random_state=_random_state,
+                                     n_jobs=args.n_jobs)
+        clf = GridSearchCV(rf, dict(n_estimators=args.n_trees), cv=inner_cv, 
+                           n_jobs=args.n_jobs, pre_dispatch=args.n_jobs,
+                           refit=True, scoring='average_precision')
+        clf.fit(_X_train, _y_train)
+        best_params = clf.best_params_
 
-    #    # Make out-of-sample predictions
-    #    y_test_hat = clf.predict_proba(_X_test)[:, 1]
-    #    y_B_hat = clf.predict_proba(X_B)[:, 1]
+        # Make out-of-sample predictions
+        y_A_test_hat = clf.predict_proba(_X_A_test)[:, 1]
+        y_B_test_hat = clf.predict_proba(_X_B_test)[:, 1]
         
     # SVM
-    if args.classifier == 'svm':
+    elif args.classifier == 'svm':
         # Train the Linear SVM
-        clf = LinearSVC(C=args.svm_C, tol=args.svm_tolerance)
+        svc = LinearSVC(tol=args.svm_tolerance, random_state=_random_state+1)
+        clf = GridSearchCV(svc, dict(C=args.svm_Cs), cv=inner_cv, 
+                           n_jobs=args.n_jobs, pre_dispatch=args.n_jobs,
+                           refit=True, scoring='average_precision')
         clf.fit(_X_train, _y_train)
+        best_params = clf.best_params_
 
         # Make out of sample predictions. Decision function outputs
         # a single list of values for binary class data.
@@ -197,23 +208,26 @@ def train_and_predict(fold, _A_data, _B_data, _random_state):
         },
         "Fold": fold,
         "Train size": len(_y_train),
+        "Best params": str(best_params)
     }
-    logger.info('- Fold: {}'.format(fold))
-    logger.info('\t- {0}->{0}: {1}'.format(A_name, format_result(result['Source'])))
-    logger.info('\t- {0}->{1}: {2}'.format(A_name, B_name, format_result(result['Target'])))
+    logger.info('- Fold: {} ({})'.format(fold, str(best_params)))
+    logger.info('\t- {0}: {1}'.format(A_name, format_result(result['Source'])))
+    logger.info('\t- {0}: {1}'.format(B_name, format_result(result['Target'])))
     
     return result, None #(clf, _pairs_test, _y_test, y_test_hat, B_pairs, y_B, y_B_hat)
 
 # Train on A, predict on held-out A and B, executing in parallel
 logger.info('[Training and evaluating models]')
 from sklearn.externals.joblib import Parallel, delayed
-r = Parallel(n_jobs=min(args.n_folds, args.n_jobs), verbose=0)( delayed(train_and_predict)(*d) for d in data_producer(args.random_seed) )
+#r = Parallel(n_jobs=min(args.n_folds, args.n_jobs), verbose=0)( delayed(train_and_predict)(*d) for d in data_producer(args.random_seed) )
+r = [train_and_predict(*d) for d in data_producer(args.random_seed)]
 results, clfs_and_preds = zip(*r)
 results = list(results)
 
 # Add an "average" row across folds, and report the current results
 average_result = deepcopy(results[-1])
 average_result['Fold'] = 'Average'
+average_result['Best params'] = 'N/A'
 for s_name in ['Source', 'Target']:
     for measure in ['AUPRC', 'AUROC', 'F1']:
         average_result[s_name][measure] = np.mean([ r[s_name][measure] for r in results ])
@@ -221,26 +235,27 @@ for s_name in ['Source', 'Target']:
 results.append(average_result)
 
 logger.info('- Average')
-logger.info('\t- {0}->{0}: {1}'.format(A_name, format_result(average_result['Source'])))
-logger.info('\t- {0}->{1}: {2}'.format(A_name, B_name, format_result(average_result['Target'])))
+logger.info('\t- {0}: {1}'.format(A_name, format_result(average_result['Source'])))
+logger.info('\t- {0}: {1}'.format(B_name, format_result(average_result['Target'])))
 
 # Flatten results
 flat_results = []
 for r in results:
     for ty in ['Source', 'Target']:
         flat_results.append({
-            "Train": r['Source']['Name'],
+            "Train": '{}+{}'.format(r['Source']['Name'], r['Target']['Name']),
             "Test": r[ty]['Name'],
             "AUROC": r[ty]['AUROC'],
             "AUPRC": r[ty]['AUPRC'],
             "F1": r[ty]['F1'],
             "Fold": r['Fold'],
             "Train size": r['Train size'],
-            "Test size": r[ty]['Test size']
+            "Test size": r[ty]['Test size'],
+            "Best params": r['Best params']
         })
     
 # Output results to file
-df = pd.DataFrame(flat_results)[['Train', 'Test', 'Fold', 'F1', 'AUROC', 'AUPRC', 'Train size', 'Test size']]
+df = pd.DataFrame(flat_results)[['Train', 'Test', 'Fold', 'F1', 'AUROC', 'AUPRC', 'Train size', 'Test size', 'Best params']]
 df = df.sort_values(['Train', 'Test', 'Fold'])
 df.to_csv(args.output_file, sep='\t', index=False)
 
