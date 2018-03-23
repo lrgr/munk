@@ -1,0 +1,13 @@
+run-name: collins-roguev
+A:
+  data-name: collins
+  name: sc
+  gi: ../../data/gi/collins/sc/collins-sc-emap-gis-std.tsv
+  ppi: ../../data/ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi-std.tsv
+B:
+  data-name: roguev
+  name: sp
+  gi: ../../data/gi/roguev/sp/roguev-sp-emap-gis-std.tsv
+  ppi: ../../data/ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi-std.tsv
+homologs: ../../data/homologs/sc-sp/sc-sp-homologs.txt
+sample-negs: False
