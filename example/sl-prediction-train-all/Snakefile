@@ -49,7 +49,7 @@ PREDICTION_DATA_FMT = join(OUTPUT_DIR, '{}-prediction-data-{{hold_out}}-{{landma
 # General
 rule all:
     input:
-        expand(PREDICTION_SUMMARY_FMT, hold_out=config.get('hold_outs'), landmarks=[WITH_LANDMARKS, NO_LANDMARKS]),
+        expand(PREDICTION_SUMMARY_FMT, hold_out=config.get('hold_outs'), landmarks=[WITH_LANDMARKS]),#, NO_LANDMARKS]),
         # TODO: detailed pickled output data not implemented yet
         #expand(PREDICTION_DATA_FMT, hold_out=config.get('hold_outs'), landmarks=[WITH_LANDMARKS, NO_LANDMARKS])
         

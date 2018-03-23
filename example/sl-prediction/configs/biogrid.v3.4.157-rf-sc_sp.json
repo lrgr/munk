@@ -16,9 +16,9 @@
 	}
     },
     "n_landmarks": 400,
-    "dataset_name": "biogrid.v3.4.157-rf",
+    "dataset_name": "biogrid.v3.4.157",
     "hold_outs": ["genes", "pairs"],
     "sinatra_featurize": true,
-    "n_jobs": 42,
+    "n_jobs": 40, 
     "classifier": "rf"
 }

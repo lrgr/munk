@@ -147,6 +147,7 @@ def train_and_predict(fold, _pairs_train, _X_train, _y_train, _pairs_test, _X_te
         # Train the Linear SVM
         svc = LinearSVC(tol=args.svm_tolerance, random_state=_random_state+1)
         clf = GridSearchCV(svc, dict(C=args.svm_Cs), cv=inner_cv,
+                           n_jobs=args.n_jobs, pre_dispatch=args.n_jobs,
                            refit=True, scoring='average_precision')
         clf.fit(_X_train, _y_train)
         best_params = clf.best_params_
@@ -188,7 +189,8 @@ def train_and_predict(fold, _pairs_train, _X_train, _y_train, _pairs_test, _X_te
 # Train on A, predict on held-out A and B, executing in parallel
 logger.info('[Training and evaluating models]')
 from sklearn.externals.joblib import Parallel, delayed
-r = Parallel(n_jobs=min(args.n_folds, args.n_jobs), verbose=0)( delayed(train_and_predict)(*d) for d in data_producer(args.random_seed) )
+#r = Parallel(n_jobs=min(args.n_folds, args.n_jobs), verbose=0)( delayed(train_and_predict)(*d) for d in data_producer(args.random_seed) )
+r = [train_and_predict(*d) for d in data_producer(args.random_seed)]
 results, clfs_and_preds = zip(*r)
 results = list(results)
 
@@ -219,7 +221,7 @@ for r in results:
             "Fold": r['Fold'],
             "Train size": r['Train size'],
             "Test size": r['Test size'],
-            "Best params", r['Best params']
+            "Best params": r['Best params']
         })
     
 # Output results to file

@@ -164,7 +164,7 @@ def train_and_predict(fold, _A_data, _B_data, _random_state):
                                      random_state=_random_state,
                                      n_jobs=args.n_jobs)
         clf = GridSearchCV(rf, dict(n_estimators=args.n_trees), cv=inner_cv, 
-                           n_jobs=args.n_jobs, pre_dispatch=args.n_jobs,
+                           n_jobs=1, pre_dispatch=1,
                            refit=True, scoring='average_precision')
         clf.fit(_X_train, _y_train)
         best_params = clf.best_params_
