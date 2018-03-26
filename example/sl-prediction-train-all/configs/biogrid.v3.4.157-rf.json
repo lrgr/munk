@@ -2,7 +2,7 @@
     "A": {
 	"name": "sc",
 	"ppi": "../../data/ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi-std.tsv",
-	"gi": "../../data/gi/biogrid/sc/sc-biogrid.v3.2.104-sls-std.tsv",
+	"gi": "../../data/gi/biogrid/sc/sc-biogrid.v3.4.157-sls-std.tsv",
 	"homologs": {
 	    "B": "../../data/homologs/sc-sp/sc-sp-homologs.txt"
 	}
