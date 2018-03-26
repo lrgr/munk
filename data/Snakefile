@@ -1,0 +1,18 @@
+configfile: "data.yml"
+
+files = config.keys()
+
+rule all:
+    input:
+        files
+
+rule download:
+    output:
+        '{file}'
+    params:
+        url = lambda w: config[w.file]
+    shell:
+        '''
+        wget -O {output} {params.url}
+        '''
+
