@@ -79,3 +79,8 @@ homologs/human-mouse/human-mouse.txt: |
     https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/homologs/human-mouse/human-mouse.txt
 homologs/human-mouse/mouse-human.txt: |
     https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/homologs/human-mouse/mouse-human.txt
+
+homologs/human-sc/human-sc.txt: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/homologs/human-sc/human-sc.txt
+homologs/mouse-sc/mouse-sc.txt: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/homologs/mouse-sc/mouse-sc.txt

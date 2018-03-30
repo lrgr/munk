@@ -5,3 +5,7 @@ B-ppi: ../../data/ppi/biogrid/sp/sp-biogrid.v3.4.157-ppi-std.tsv
 A-to-B-homologs: ../../data/homologs/sc-sp/sc-sp-homologs.txt
 B-to-A-homologs: ../../data/homologs/sc-sp/sp-sc-homologs.txt
 n_landmarks: 400
+xmax: 0.06
+line_width: 3
+font_size: 16
+no-resnik: True

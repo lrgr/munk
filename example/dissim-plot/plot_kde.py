@@ -20,7 +20,9 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--HANDL_scores', required=True)
     parser.add_argument('-o', '--output', required=True)
-    parser.add_argument('--xmax', type=float, required=False, default=0.6)
+    parser.add_argument('-xm', '--xmax', type=float, required=False, default=0.6)
+    parser.add_argument('-lw', '--line_width', type=float, required=False, default=2)
+    parser.add_argument('-fs', '--font_size', type=float, required=False, default=12)
     return parser.parse_args()
     
 
@@ -69,7 +71,7 @@ def main(args):
     dissims /= np.mean(dissims)
     _, _, _, hom_dissims, other_dissims = \
         handl.separate_scores(dissims, landmark_idxs, homolog_idxs)
-    plots = [(hom_dissims, 'Homologs'), (other_dissims, 'Other')]
+    plots = [(hom_dissims, 'Homolog pairs'), (other_dissims, 'Other pairs')]
     plot_and_save(plots, 'Dissimilarity scores', args.output)
 
     
