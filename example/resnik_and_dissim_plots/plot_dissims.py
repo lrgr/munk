@@ -72,7 +72,10 @@ def main(args):
     _, _, _, hom_dissims, other_dissims = \
         handl.separate_scores(dissims, landmark_idxs, homolog_idxs)
     plots = [(hom_dissims, 'Homolog pairs'), (other_dissims, 'Other pairs')]
-    plot_and_save(plots, 'Dissimilarity scores', args.output)
+    plot_and_save(plots, 'Dissimilarity scores', args.output,
+                 xmax=args.xmax,
+                 font_size=args.font_size,
+                 line_width=args.line_width)
 
     
     # Load 

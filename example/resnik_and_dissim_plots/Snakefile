@@ -5,7 +5,7 @@ A_B_OUTPUT_DIR = 'output/{}-to-{}'.format(SPECIES_A, SPECIES_B)
 
 SRC_DIR  = '../../src'
 HANDL = SRC_DIR + '/handl.py'
-PLOT = 'plot_kde.py'
+PLOT = 'plot_dissims.py'
 PLOT_RESNIK = 'plot_resnik_v_handl.py'
 
 # A to B embeddings and outputs
