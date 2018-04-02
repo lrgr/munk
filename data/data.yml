@@ -69,3 +69,26 @@ toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data_info.txt: |
         https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_sl_data_info.txt
 toy/degree_sum_model/examples/alice_n100_d14-bob_n120_d14-homologs.txt: |
         https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/toy/degree_sum_model/examples/alice_n100_d14-bob_n120_d14-homologs.txt
+
+# HUMAN-MOUSE PPIs and Homologs
+ppi/string-v9.1/human/ensembl-human-network.txt: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/string-v9.1/human/ensembl-human-network.txt
+ppi/string-v9.1/mouse/ensembl-mouse-network.txt: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/ppi/string-v9.1/mouse/ensembl-mouse-network.txt
+homologs/human-mouse/human-mouse.txt: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/homologs/human-mouse/human-mouse.txt
+homologs/human-mouse/mouse-human.txt: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/homologs/human-mouse/mouse-human.txt
+
+homologs/human-sc/human-sc.txt: |
+    https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/homologs/human-sc/human-sc.txt
+homologs/mouse-sc/mouse-sc.txt: |
+
+# Resnik Scores
+
+resnik_scores/human-mouse.npz: |
+    https://obj.umiacs.umd.edu/lrgr/handl/resnik_scores/resnik_scores/human-mouse.npz
+resnik_scores/human-sc.npz: |
+    https://obj.umiacs.umd.edu/lrgr/handl/resnik_scores/resnik_scores/human-sc.npz
+resnik_scores/mouse-sc.npz: |
+    https://obj.umiacs.umd.edu/lrgr/handl/resnik_scores/resnik_scores/mouse-sc.npz
