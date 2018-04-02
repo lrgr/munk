@@ -260,7 +260,8 @@ def main(args):
     
     sim_scores_matrix = np.dot(source_X, target_X.T)
     joblib.dump(dict(X=sim_scores_matrix, A_nodes=source_nodes, 
-                     B_nodes=target_nodes),
+                     B_nodes=target_nodes, landmarks=landmarks,
+                     homologs=homologs),
                 args.sim_scores_output_file)
 
     log.info('Saving landmark list to %s', args.landmarks_output_file)
