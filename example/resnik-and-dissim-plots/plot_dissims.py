@@ -51,6 +51,7 @@ def plot_and_save(scores_and_labels, xlabel, output,
     plt.ylabel('Density', size = font_size)
     plt.xlabel(xlabel, size = font_size)
     plt.legend(loc='best', fontsize = font_size)
+    plt.tight_layout()
     plt.savefig(output)
 
 def main(args):
@@ -69,6 +70,8 @@ def main(args):
     
     dissims = 1. / sim_scores
     dissims /= np.mean(dissims)
+
+    # Separate homolog, and other pairs from landmark pairs.
     _, _, _, hom_dissims, other_dissims = \
         handl.separate_scores(dissims, landmark_idxs, homolog_idxs)
     plots = [(hom_dissims, 'Homolog pairs'), (other_dissims, 'Other pairs')]
@@ -76,10 +79,6 @@ def main(args):
                  xmax=args.xmax,
                  font_size=args.font_size,
                  line_width=args.line_width)
-
-    
-    # Load 
-    pass
 
 if __name__ == '__main__':
     main(parse_args())

@@ -88,6 +88,7 @@ def main(args):
     plt.xlabel('Ranked pairs',size=args.font_size)
     plt.ylabel('Resnik score', size=args.font_size)
     plt.legend(loc='best', fontsize=args.font_size)
+    plt.tight_layout()
     plt.savefig(args.output)
     plt.close()
 
