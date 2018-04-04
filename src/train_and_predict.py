@@ -10,8 +10,6 @@ from copy import deepcopy
 
 # Load our modules
 from constants import *
-this_dir = os.path.dirname(__file__)
-sys.path.append(os.path.join(this_dir, '../../src'))
 from i_o import get_logger
 
 # Parse command-line arguments
@@ -26,8 +24,7 @@ parser.add_argument('-nif', '--n_inner_folds', type=int, default=3, required=Fal
 parser.add_argument('-nj', '--n_jobs', type=int, default=1, required=False)
 parser.add_argument('-ho', '--hold-out', type=str, choices=[GENE_PAIRS, GENES],
                     default=GENE_PAIRS, required=False)
-#TODO 
-#parser.add_argument('-po', '--predictions_output_file', type=str, required=True)
+parser.add_argument('-tm', '--train_mode', type=str, choices=[SRC, TGT, BOTH])
 
 # Add classifier choices with subparsers
 subparser = parser.add_subparsers(dest='classifier', help='Classifier')
@@ -54,10 +51,20 @@ logger.info('[Loading features and genetic interactions]')
 a_data = joblib.load(args.feature_files[0])
 b_data = joblib.load(args.feature_files[1])
 
+
 X_A, y_A = np.array(a_data.get('X')), a_data.get('y')
 A_pairs, A_name = np.asarray(a_data.get('pairs')), args.names[0]
 X_B, y_B = np.array(b_data.get('X')), b_data.get('y')
 B_pairs, B_name = np.asarray(b_data.get('pairs')), args.names[1]
+
+if args.train_mode == BOTH:
+    TRAIN_NAME = '{}+{}'.format(A_name, B_name)
+elif args.train_mode == SRC:
+    TRAIN_NAME = A_name
+elif args.train_mode == TGT:
+    TRAIN_NAME = B_name
+else:
+    raise NotImplementedError
 
 # Log info about the data
 logger.info('- Species A (%s): %s samples x %s features (%s SLs)' % (A_name, X_A.shape[0], X_A.shape[1], int(y_A.sum())))
@@ -77,85 +84,100 @@ from itertools import permutations
 def format_result(results, skip_keys={"Name"}):
     return '; '.join('{0}={1:g}'.format(k, v) for k, v in results.items() if k not in skip_keys)
 
-# Max F1 score
 def f1(p, r):
+    ''' returns F1 score from given precision and recall '''
     if p == 0 and r == 0:
         return 0.
     else:
         return 2.0 * p * r / (p + r)
     
 def max_f1_score(_y_true, _y_hat):
+    ''' 
+    Returns maximum F1 score from given list of predicted and ground truth values
+    '''
     ps, rs, _ = precision_recall_curve(_y_true, _y_hat)
     f1s = np.asarray([ f1(p, r) for p, r in zip(ps, rs)])
     return max(f1s)
 
 # Helper functions to be used by Parallel to train/predict
 
-def data_producer(random_state):
-    kf = KFold(n_splits=args.n_folds, random_state=random_state, shuffle=True)
+def kf_genes(_A_pairs, _B_pairs, n_splits, random_state, shuffle=True):
+    '''
+    Returns iterator over gene pairs for source and target species with respect to
+    k-fold cross validation on _genes_.
+    '''
+    kf = KFold(n_splits=n_splits, random_state=random_state, shuffle=shuffle)
+    A_genes = sorted(set( g for p in _A_pairs for g in p ))
+    B_genes = sorted(set( g for p in _B_pairs for g in p ))
+
+    # Split on genes
+    A_pair_indices = set(range(len(_A_pairs)))
+    B_pair_indices = set(range(len(_B_pairs)))
+    for (A_train_gene_index, A_test_gene_index), (B_train_gene_index, B_test_gene_index) in zip(kf.split(A_genes), kf.split(B_genes)):
+        # Get the train/test indices
+        A_train_gene_set = set( A_genes[i] for i in A_train_gene_index )
+        A_train_index = [ j for j, p in enumerate(_A_pairs) if all( g in A_train_gene_set for g in p ) ]
+        A_test_index = sorted(A_pair_indices - set(A_train_index))
+
+        B_train_gene_set = set( B_genes[i] for i in B_train_gene_index )
+        B_train_index = [ j for j, p in enumerate(_B_pairs) if all( g in B_train_gene_set for g in p ) ]
+        B_test_index = sorted(B_pair_indices - set(B_train_index))
+        yield (A_train_index, A_test_index), (B_train_index, B_test_index)
+
+def train_test_data(train_index, test_index, _X, _y, _pairs):
+    '''
+    Helper to package training and test data arrays into tuples
+    '''
+    _pairs_train, _pairs_test = _pairs[train_index], _pairs[test_index]
+    _X_train, _X_test = _X[train_index], _X[test_index]
+    _y_train, _y_test = _y[train_index], _y[test_index]
+    return _X_train, _X_test, _y_train, _y_test, _pairs_train, _pairs_test
+
+def data_producer(random_state, train_mode=BOTH):
+    '''
+    Returns enumerator over training and testing data
+    '''
     if args.hold_out == GENE_PAIRS:
-        for i, ((A_train_index, A_test_index), (B_train_index, B_test_index)) in enumerate(zip(kf.split(X_A), kf.split(X_B))):
-
-            # Split up the source datia
-            A_pairs_train, A_pairs_test = A_pairs[A_train_index], A_pairs[A_test_index]
-            X_A_train, X_A_test = X_A[A_train_index], X_A[A_test_index]
-            y_A_train, y_A_test = y_A[A_train_index], y_A[A_test_index]
-            A_data = (X_A_train, X_A_test, y_A_train, y_A_test, A_pairs_train, A_pairs_test)
-
-            # Split up the train data
-            B_pairs_train, B_pairs_test = B_pairs[B_train_index], B_pairs[B_test_index]
-            X_B_train, X_B_test = X_B[B_train_index], X_B[B_test_index]
-            y_B_train, y_B_test = y_B[B_train_index], y_B[B_test_index]
-            B_data = (X_B_train, X_B_test, y_B_train, y_B_test, B_pairs_train, B_pairs_test)
-            # Train the classifier within the source and predict within and across species
-            random_state += 1
-
-            yield i+1, A_data, B_data, random_state
+        kf = KFold(n_splits=args.n_folds, random_state=random_state, shuffle=True)
+        indices = zip(kf.split(X_A), kf.split(X_B))
 
     elif args.hold_out == GENES:
-        # Get a list of genes
-        A_genes = sorted(set( g for p in A_pairs for g in p ))
-        B_genes = sorted(set( g for p in B_pairs for g in p ))
+        indices = kf_genes(A_pairs, B_pairs, args.n_folds, random_state=random_state, shuffle=True)
+        
+    for i, ((A_train_index, A_test_index), (B_train_index, B_test_index)) in enumerate(indices):
+        if train_mode == BOTH:
+            A_data = train_test_data(A_train_index, A_test_index, X_A, y_A, A_pairs)
+            B_data = train_test_data(B_train_index, B_test_index, X_B, y_B, B_pairs)
+        elif train_mode == SRC:
+            A_data = train_test_data(A_train_index, A_test_index, X_A, y_A, A_pairs)
+            B_data = (None, X_B, None, y_B, None, B_pairs)
+        elif train_mode == TGT:
+            A_data = (None, X_A, None, y_A, None, A_pairs)
+            B_data = train_test_data(B_train_index, B_test_index, X_B, y_B, B_pairs)
+        else:
+            raise NotImplementedError
+        random_state += 1
 
-        # Split on genes
-        A_pair_indices = set(range(len(A_pairs)))
-        B_pair_indices = set(range(len(B_pairs)))
-        for i, ((A_train_gene_index, A_test_gene_index), (B_train_gene_index, B_test_gene_index)) in enumerate(zip(kf.split(A_genes), kf.split(B_genes))):
-            # Get the train/test indices
-            A_train_gene_set = set( A_genes[i] for i in A_train_gene_index )
-            A_train_index = [ j for j, p in enumerate(A_pairs) if all( g in A_train_gene_set for g in p ) ]
-            A_test_index = sorted(A_pair_indices - set(A_train_index))
-
-            B_train_gene_set = set( B_genes[i] for i in B_train_gene_index )
-            B_train_index = [ j for j, p in enumerate(B_pairs) if all( g in B_train_gene_set for g in p ) ]
-            B_test_index = sorted(B_pair_indices - set(B_train_index))
-
-            # Split up the source datia
-            A_pairs_train, A_pairs_test = A_pairs[A_train_index], A_pairs[A_test_index]
-            X_A_train, X_A_test = X_A[A_train_index], X_A[A_test_index]
-            y_A_train, y_A_test = y_A[A_train_index], y_A[A_test_index]
-            A_data = (X_A_train, X_A_test, y_A_train, y_A_test, A_pairs_train, A_pairs_test)
-
-            # Split up the train data
-            B_pairs_train, B_pairs_test = B_pairs[B_train_index], B_pairs[B_test_index]
-            X_B_train, X_B_test = X_B[B_train_index], X_B[B_test_index]
-            y_B_train, y_B_test = y_B[B_train_index], y_B[B_test_index]
-            B_data = (X_B_train, X_B_test, y_B_train, y_B_test, B_pairs_train, B_pairs_test)
-            # Train the classifier within the source and predict within and across species
-            random_state += 1
-
-            yield i+1, A_data, B_data, random_state
+        yield i+1, A_data, B_data, random_state
 
 
-def train_and_predict(fold, _A_data, _B_data, _random_state):
+def train_and_predict(fold, _A_data, _B_data, _random_state, train_mode=BOTH):
     inner_cv = KFold(n_splits=args.n_inner_folds, random_state=_random_state, shuffle=True)
     # unpack data...
     _X_A_train, _X_A_test, _y_A_train, _y_A_test, _A_pairs_train, _A_pairs_test = _A_data
     _X_B_train, _X_B_test, _y_B_train, _y_B_test, _B_pairs_train, _B_pairs_test = _B_data
     
-    # concatenate
-    _X_train = np.concatenate((_X_A_train, _X_B_train))
-    _y_train = np.concatenate((_y_A_train, _y_B_train))
+
+    if train_mode == BOTH:
+        # concatenate
+        _X_train = np.concatenate((_X_A_train, _X_B_train))
+        _y_train = np.concatenate((_y_A_train, _y_B_train))
+    elif train_mode == SRC:
+        _X_train = _X_A_train
+        _y_train = _y_A_train
+    elif train_mode == TGT:
+        _X_train = _X_B_train
+        _y_train = _y_B_train
 
     # Random forest
     if args.classifier == 'rf':
@@ -163,8 +185,9 @@ def train_and_predict(fold, _A_data, _B_data, _random_state):
         rf = RandomForestClassifier(n_estimators=args.n_trees, max_depth=args.max_depth,
                                      random_state=_random_state,
                                      n_jobs=args.n_jobs)
+        
         clf = GridSearchCV(rf, dict(n_estimators=args.n_trees), cv=inner_cv, 
-                           n_jobs=1, pre_dispatch=1,
+                           n_jobs=args.n_jobs, pre_dispatch=args.n_jobs,
                            refit=True, scoring='average_precision')
         clf.fit(_X_train, _y_train)
         best_params = clf.best_params_
@@ -211,16 +234,24 @@ def train_and_predict(fold, _A_data, _B_data, _random_state):
         "Best params": str(best_params)
     }
     logger.info('- Fold: {} ({})'.format(fold, str(best_params)))
-    logger.info('\t- {0}: {1}'.format(A_name, format_result(result['Source'])))
-    logger.info('\t- {0}: {1}'.format(B_name, format_result(result['Target'])))
+    logger.info('\t- {0}->{1}: {2}'.format(TRAIN_NAME, A_name, format_result(result['Source'])))
+    logger.info('\t- {0}->{1}: {2}'.format(TRAIN_NAME, B_name, format_result(result['Target'])))
     
     return result, None #(clf, _pairs_test, _y_test, y_test_hat, B_pairs, y_B, y_B_hat)
 
 # Train on A, predict on held-out A and B, executing in parallel
 logger.info('[Training and evaluating models]')
+if args.classifier == 'rf':
+    logger.info('\t - using RandomForestClassifier')
+    logger.info('\t - grid search over: %s', str(dict(n_estimators=args.n_trees)))
+elif  args.classifier == 'svm':
+    logger.info('\t - using LinearSVC')
+    logger.info('\t - grid search over: %s', str(dict(C=args.svm_Cs)))
+else:
+    pass
+
 from sklearn.externals.joblib import Parallel, delayed
-#r = Parallel(n_jobs=min(args.n_folds, args.n_jobs), verbose=0)( delayed(train_and_predict)(*d) for d in data_producer(args.random_seed) )
-r = [train_and_predict(*d) for d in data_producer(args.random_seed)]
+r = [train_and_predict(*d, train_mode=args.train_mode) for d in data_producer(args.random_seed, train_mode=args.train_mode)]
 results, clfs_and_preds = zip(*r)
 results = list(results)
 
@@ -228,6 +259,8 @@ results = list(results)
 average_result = deepcopy(results[-1])
 average_result['Fold'] = 'Average'
 average_result['Best params'] = 'N/A'
+average_result['Train size'] = 'N/A'
+average_result['Test size'] = 'N/A'
 for s_name in ['Source', 'Target']:
     for measure in ['AUPRC', 'AUROC', 'F1']:
         average_result[s_name][measure] = np.mean([ r[s_name][measure] for r in results ])
@@ -235,15 +268,15 @@ for s_name in ['Source', 'Target']:
 results.append(average_result)
 
 logger.info('- Average')
-logger.info('\t- {0}: {1}'.format(A_name, format_result(average_result['Source'])))
-logger.info('\t- {0}: {1}'.format(B_name, format_result(average_result['Target'])))
+logger.info('\t- {0}->{1}: {2}'.format(TRAIN_NAME, A_name, format_result(average_result['Source'])))
+logger.info('\t- {0}->{1}: {2}'.format(TRAIN_NAME, B_name, format_result(average_result['Target'])))
 
 # Flatten results
 flat_results = []
 for r in results:
     for ty in ['Source', 'Target']:
         flat_results.append({
-            "Train": '{}+{}'.format(r['Source']['Name'], r['Target']['Name']),
+            "Train": TRAIN_NAME,
             "Test": r[ty]['Name'],
             "AUROC": r[ty]['AUROC'],
             "AUPRC": r[ty]['AUPRC'],
@@ -258,19 +291,3 @@ for r in results:
 df = pd.DataFrame(flat_results)[['Train', 'Test', 'Fold', 'F1', 'AUROC', 'AUPRC', 'Train size', 'Test size', 'Best params']]
 df = df.sort_values(['Train', 'Test', 'Fold'])
 df.to_csv(args.output_file, sep='\t', index=False)
-
-# TODO
-#results_data = dict(summary=flat_results, data=[])
-#
-#for clf, pairs_test, y_test, y_test_hat, B_pairs, y_B, y_B_hat in clfs_and_preds:
-#    results_data['data'].append(
-#        dict(clf_type=args.classifier,
-#             clf=clf,
-#             pairs_test=pairs_test,
-#             y_test=y_test,
-#             y_test_hat=y_test_hat,
-#             B_pairs=B_pairs,
-#             y_B=y_B,
-#             y_B_hat=y_B_hat))
-## Save SVM, and predictions to disk...
-#joblib.dump(results_data, args.predictions_output_file)

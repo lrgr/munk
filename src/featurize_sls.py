@@ -10,8 +10,6 @@ from collections import Counter
 
 # Load our modules
 from constants import *
-this_dir = os.path.dirname(__file__)
-sys.path.append(os.path.join(this_dir, '../../src'))
 from i_o import get_logger
 
 ################################################################################

@@ -19,9 +19,7 @@
     },
     "n_landmarks": 400,
     "dataset_name": "collins-roguev-svm",
-    "output_dir": "/scratch0/jfan03/HANDL/example/sl-prediction-within/output",
-    "n_jobs": 10,
-    "hold_outs": ["genes", "pairs"],
-    "normalization": "none",
-    "classifier": "svm"
+    "output_dir": "/scratch0/jfan03/HANDL/example/sl-prediction-train-all/output",
+    "n_jobs": 20,
+    "hold_outs": ["genes", "pairs"]
 }

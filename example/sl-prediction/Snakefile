@@ -17,8 +17,7 @@ NO_LANDMARKS = 'no_landmarks'
 # Load required modules
 from os.path import join
 
-RUN_NAME  = '-'.join([DATASET_NAME, SRC_SPECIES, TGT_SPECIES])
-RUN_NAME += '-' + config.get('normalization') if config.get('normalization') != 'none' else ''
+RUN_NAME = '-'.join([DATASET_NAME, SRC_SPECIES, TGT_SPECIES])
 
 # Directories
 SRC_CODE_DIR  = '../../src'
@@ -29,11 +28,11 @@ LOG_DIR = join(OUTPUT_DIR, 'log')
 
 # Files
 HANDL = join(SRC_CODE_DIR, 'handl.py')
+FEATURIZE = join(SRC_CODE_DIR, 'featurize_sls.py')
+TRAIN_AND_PREDICT = join(SRC_CODE_DIR, 'train_and_predict.py')
 
 EMBEDDING_FORMAT_STR = '%s/{name}-HANDL-embedding.pkl' % (EMBEDDINGS_DIR)
-RAW_SRC_EMBEDDING = '%s/%s-HANDL-embedding-raw.pkl' % (EMBEDDINGS_DIR, SRC_SPECIES)
 SRC_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=SRC_SPECIES)
-RAW_TGT_EMBEDDING = '%s/%s-HANDL-embedding-raw.pkl' % (EMBEDDINGS_DIR, TGT_SPECIES)
 TGT_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=TGT_SPECIES)
 
 FEATURE_FORMAT_STR = '%s/{name}-features-{landmarks}.pkl' % FEATURES_DIR
@@ -43,7 +42,7 @@ TGT_FEATURES = FEATURE_FORMAT_STR.format(name=TGT_SPECIES, landmarks='{landmarks
 SIM_SCORES = '{}/{}-HANDL-similarity-scores.pkl'.format(OUTPUT_DIR, RUN_NAME)
 LANDMARKS = '{}/{}-HANDL-landmarks.tsv'.format(OUTPUT_DIR, RUN_NAME)
 RUNTIMES_FILE = '{}/{}-HANDL-runtimes.tsv'.format(OUTPUT_DIR, RUN_NAME)
-PREDICTION_SUMMARY_FMT = join(OUTPUT_DIR, '{}-prediction-summary-{{hold_out}}-{{landmarks}}.tsv'.format(RUN_NAME))
+PREDICTION_SUMMARY_FMT = join(OUTPUT_DIR, '{}-prediction-summary-{{hold_out}}-{{landmarks}}-tr_on_{{train_data}}.tsv'.format(RUN_NAME))
 PREDICTION_DATA_FMT = join(OUTPUT_DIR, '{}-prediction-data-{{hold_out}}-{{landmarks}}.pkl'.format(RUN_NAME))
 
 ################################################################################
@@ -52,8 +51,11 @@ PREDICTION_DATA_FMT = join(OUTPUT_DIR, '{}-prediction-data-{{hold_out}}-{{landma
 # General
 rule all:
     input:
-        expand(PREDICTION_SUMMARY_FMT, hold_out=config.get('hold_outs'), landmarks=[WITH_LANDMARKS, NO_LANDMARKS]),
-        expand(PREDICTION_DATA_FMT, hold_out=config.get('hold_outs'), landmarks=[WITH_LANDMARKS, NO_LANDMARKS])
+        expand(PREDICTION_SUMMARY_FMT, 
+               hold_out=config.get('hold_outs'), 
+               landmarks=[WITH_LANDMARKS],
+               train_data=config.get('train_data', ['both', 'src', 'tgt']))
+        
 
 # Train and predict
 rule train_and_predict:
@@ -70,20 +72,21 @@ rule train_and_predict:
         n_trees='-nt ' + config.get('n_trees') if 'n_trees' in config else '',
         max_depth='-md ' + config.get('max_depth') if 'max_depth' in config else '',
         svm_C='-sc ' + config.get('svm_C') if 'svm_C' in config else '',
-        svm_tol='-st ' + config.get('svm_tol') if 'svm_tol' in config else ''
+        svm_tol='-st ' + config.get('svm_tol') if 'svm_tol' in config else '',
+        train_mode  =  lambda w:'-tm {}'.format(w.train_data)
     threads: config.get('n_jobs', 1)
     output:
         summary=PREDICTION_SUMMARY_FMT,
-        data=PREDICTION_DATA_FMT,
+
     shell:
         '''
-        python train_and_predict.py \
+        python {TRAIN_AND_PREDICT} \
             -ff {input.src} {input.tgt} \
             -n {params.names} \
             -o {output.summary} \
-            -po {output.data} \
             -rs {params.random_seed} \
             -nj {params.n_jobs} -nf {params.n_folds} -ho {params.hold_out} \
+            {params.train_mode} \
             {params.classifier} {params.n_trees} {params.max_depth} \
             {params.svm_C} {params.svm_tol}
         '''
@@ -99,23 +102,9 @@ rule featurize:
     output:
         FEATURE_FORMAT_STR
     shell:
-        'python featurize_sls.py -ef {input.embedding} -gif {input.gis} '\
+        'python {FEATURIZE} -ef {input.embedding} -gif {input.gis} '\
         '-o {output} {params.sinatra_featurize} {params.remove_landmarks}'
 
-# Run normalization (if necessary)
-rule normalize:
-    input:
-        src=RAW_SRC_EMBEDDING,
-        tgt=RAW_TGT_EMBEDDING
-    params:
-        norm=config.get('normalization', 'none')
-    output:
-        src=SRC_EMBEDDING,
-        tgt=TGT_EMBEDDING
-    shell:
-        'python normalize_embedding.py -sf {input.src} -tf {input.tgt} '\
-        '-osf {output.src} -otf {output.tgt} -n {params.norm}'
-        
 # Construct embeddings
 rule embed:
     input:
@@ -123,8 +112,8 @@ rule embed:
         tgt_ppi=config.get(TGT).get('ppi'),
         homologs = config.get(SRC).get('homologs').get(TGT)
     output:
-        src_embedding=RAW_SRC_EMBEDDING,
-        tgt_embedding=RAW_TGT_EMBEDDING,
+        src_embedding=SRC_EMBEDDING,
+        tgt_embedding=TGT_EMBEDDING,
         sim_scores=SIM_SCORES,
         landmarks=LANDMARKS,
         runtimes=RUNTIMES_FILE

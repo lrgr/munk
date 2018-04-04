@@ -19,9 +19,9 @@
     },
     "n_landmarks": 400,
     "dataset_name": "collins-roguev-rf",
-    "output_dir": "/scratch0/jfan03/HANDL/example/sl-prediction-within/output",
-    "n_jobs": 30,
+    "output_dir": "/scratch0/jfan03/HANDL/example/sl-prediction-train-all/output",
+    "n_jobs": 42,
     "hold_outs": ["genes", "pairs"],
-    "normalization": "none",
+    "train_data": ["both", "src", "tgt"],
     "classifier": "rf"
 }

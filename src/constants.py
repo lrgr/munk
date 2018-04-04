@@ -13,3 +13,8 @@ FEATURE_FUNCTIONS = { ADD_FEATURES, MEAN_FEATURES }
 # Cross-validation choices
 GENES = 'genes'
 GENE_PAIRS = 'pairs'
+
+# Training mode choices
+SRC = 'src'
+TGT = 'tgt'
+BOTH = 'both'
