@@ -16,7 +16,7 @@
 	}
     },
     "n_landmarks": 20,
-    "normalization": "coral-src",
-    "dataset_name": "toy",
-    "hold_outs": ["genes", "pairs"]
+    "dataset_name": "toy-svm",
+    "hold_outs": ["genes", "pairs"],
+    "n_jobs": 10
 }
