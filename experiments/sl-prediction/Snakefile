@@ -1,0 +1,142 @@
+################################################################################
+# SETTINGS, CONFIGURATION, FILES, AND DIRECTORIES
+################################################################################
+# Configuration
+SRC = config.get('src', 'A') # A or B (default: A)
+TGT = config.get('tgt', 'B') # A or B (default: B)
+
+SRC_SPECIES = config.get(SRC).get('name')
+TGT_SPECIES = config.get(TGT).get('name')
+NAME_TO_SPECIES = { SRC_SPECIES: SRC, TGT_SPECIES: TGT }
+
+DATASET_NAME = config.get('dataset_name')
+
+WITH_LANDMARKS = 'w_landmarks'
+NO_LANDMARKS = 'no_landmarks'
+
+# Load required modules
+from os.path import join
+
+RUN_NAME = '-'.join([DATASET_NAME, SRC_SPECIES, TGT_SPECIES])
+
+# Directories
+OUTPUT_DIR = join(config.get('output_dir', 'output'), RUN_NAME) # default prefix: output
+EMBEDDINGS_DIR = join(OUTPUT_DIR, 'embeddings')
+FEATURES_DIR = join(OUTPUT_DIR, 'features')
+LOG_DIR = join(OUTPUT_DIR, 'log')
+
+# Files
+HANDL = '../../scripts/compute_embeddings.py'
+FEATURIZE = 'featurize_sls.py'
+TRAIN_AND_PREDICT = 'train_and_predict.py'
+
+EMBEDDING_FORMAT_STR = '%s/{name}-HANDL-embedding.pkl' % (EMBEDDINGS_DIR)
+SRC_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=SRC_SPECIES)
+TGT_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=TGT_SPECIES)
+
+FEATURE_FORMAT_STR = '%s/{name}-features-{landmarks}.pkl' % FEATURES_DIR
+SRC_FEATURES = FEATURE_FORMAT_STR.format(name=SRC_SPECIES, landmarks='{landmarks}')
+TGT_FEATURES = FEATURE_FORMAT_STR.format(name=TGT_SPECIES, landmarks='{landmarks}')
+
+SIM_SCORES = '{}/{}-HANDL-similarity-scores.pkl'.format(OUTPUT_DIR, RUN_NAME)
+LANDMARKS = '{}/{}-HANDL-landmarks.tsv'.format(OUTPUT_DIR, RUN_NAME)
+RUNTIMES_FILE = '{}/{}-HANDL-runtimes.tsv'.format(OUTPUT_DIR, RUN_NAME)
+PREDICTION_SUMMARY_FMT = join(OUTPUT_DIR, '{}-prediction-summary-{{hold_out}}-{{landmarks}}-tr_on_{{train_data}}.tsv'.format(RUN_NAME))
+PREDICTION_DATA_FMT = join(OUTPUT_DIR, '{}-prediction-data-{{hold_out}}-{{landmarks}}.pkl'.format(RUN_NAME))
+
+################################################################################
+# RULES
+################################################################################
+# General
+rule all:
+    input:
+        expand(PREDICTION_SUMMARY_FMT, 
+               hold_out=config.get('hold_outs'), 
+               landmarks=[WITH_LANDMARKS],
+               train_data=config.get('train_data', ['both', 'src', 'tgt']))
+        
+
+# Train and predict
+rule train_and_predict:
+    input:
+        src=SRC_FEATURES,
+        tgt=TGT_FEATURES
+    params:
+        names='{} {}'.format(SRC_SPECIES, TGT_SPECIES),
+        random_seed=config.get('random_seed', 182675),
+        n_folds=config.get('n_folds', 4),
+        n_jobs=config.get('n_jobs', 1),
+        hold_out=lambda wildcards: wildcards.get('hold_out'),
+        classifier=config.get('classifier', 'svm'),
+        n_trees='-nt ' + ' '.join([str(val) for val in config.get('n_trees')]) if 'n_trees' in config else '',
+        max_depth='-md ' + config.get('max_depth') if 'max_depth' in config else '',
+        svm_C='-sc ' + ' '.join([str(val) for val in config.get('svm_C')]) if 'svm_C' in config else '',
+        svm_tol='-st ' + config.get('svm_tol') if 'svm_tol' in config else '',
+        train_mode  =  lambda w:'-tm {}'.format(w.train_data)
+    threads: config.get('n_jobs', 1)
+    output:
+        summary=PREDICTION_SUMMARY_FMT,
+
+    shell:
+        '''
+        python {TRAIN_AND_PREDICT} \
+            -ff {input.src} {input.tgt} \
+            -n {params.names} \
+            -o {output.summary} \
+            -rs {params.random_seed} \
+            -nj {params.n_jobs} -nf {params.n_folds} -ho {params.hold_out} \
+            {params.train_mode} \
+            {params.classifier} {params.n_trees} {params.max_depth} \
+            {params.svm_C} {params.svm_tol}
+        '''
+        
+# Construct features for the given SL dataset
+rule featurize:
+    input:
+        embedding=EMBEDDING_FORMAT_STR,
+        gis=lambda wildcards: config.get(NAME_TO_SPECIES.get(wildcards.name)).get('gi')
+    params:
+        sinatra_featurize='--sinatra-featurize' if config.get('sinatra_featurize') else '',
+        remove_landmarks=lambda wildcards: '--remove-landmarks' if wildcards.get('landmarks') == 'no_landmarks' else ''
+    output:
+        FEATURE_FORMAT_STR
+    shell:
+        'python {FEATURIZE} -ef {input.embedding} -gif {input.gis} '\
+        '-o {output} {params.sinatra_featurize} {params.remove_landmarks}'
+
+# Construct embeddings
+rule embed:
+    input:
+        src_ppi=config.get(SRC).get('ppi'),
+        tgt_ppi=config.get(TGT).get('ppi'),
+        homologs = config.get(SRC).get('homologs').get(TGT)
+    output:
+        src_embedding=SRC_EMBEDDING,
+        tgt_embedding=TGT_EMBEDDING,
+        sim_scores=SIM_SCORES,
+        landmarks=LANDMARKS,
+        runtimes=RUNTIMES_FILE
+    params:
+        n_landmarks = config.get('n_landmarks'),
+        random_seed = config.get('random_seed', 182675),
+        tgt_lam = config.get(TGT).get('lambda', 0.05),
+        src_lam = config.get(SRC).get('lambda', 0.05)
+    log:
+        '{}/{}-embed.log'.format(LOG_DIR, RUN_NAME)
+    shell:
+        '''
+        python {HANDL} \
+            --source_edgelist {input.src_ppi} \
+            --target_edgelist {input.tgt_ppi} \
+            --homolog_list {input.homologs} \
+            --source_output_file {output.src_embedding} \
+            --target_output_file {output.tgt_embedding} \
+            --sim_scores_output_file {output.sim_scores} \
+            --landmarks_output_file {output.landmarks} \
+            --runtimes_file {output.runtimes} \
+            --n_landmarks {params.n_landmarks} \
+            --random_seed {params.random_seed} \
+            --src_lam {params.src_lam} \
+            --tgt_lam {params.tgt_lam} \
+            2>&1 | tee {log}
+        '''

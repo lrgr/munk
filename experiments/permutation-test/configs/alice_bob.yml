@@ -1,0 +1,13 @@
+A_species: alice
+B_species: bob
+edgelists:
+    alice: ../../data/toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_ppi_edgelist.tsv
+    bob: ../../data/toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_ppi_edgelist.tsv
+homologs:
+    alice-bob:  ../../data/toy/degree_sum_model/examples/alice_n100_d14-bob_n120_d14-homologs.txt
+n_permutations: 10
+n_tries: 10
+n_landmarks: 20
+lambda: 0.05
+threads: 24
+test: True
