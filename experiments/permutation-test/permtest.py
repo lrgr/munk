@@ -63,7 +63,7 @@ def dissim_diff(sim_scores, landmark_idxs, homolog_idxs):
         handl.separate_scores(sim_scores, landmark_idxs, homolog_idxs)
     other_mean = np.mean(other_scores)
     hom_mean = np.mean(hom_hom_scores)
-    return other_mean - hom_mean, other_mean, hom_mean
+    return hom_mean - other_mean, other_mean, hom_mean
 
 def difference_in_means(source_data,
                         target_data,
@@ -99,9 +99,9 @@ def difference_in_means_from_files(source_data_file,
         return None
 
 def one_tail_pval(observed, permuted):
-    n_less_than = float(np.sum( permuted > observed ))
+    n_significant = float(np.sum( permuted > observed ))
 
-    return n_less_than / float(len(permuted)), n_less_than, float(len(permuted))
+    return n_significant / float(len(permuted)), n_significant, float(len(permuted))
 
 def effect_size(observed, control):
     std_dev = np.std(control)
