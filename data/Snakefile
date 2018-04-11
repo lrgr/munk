@@ -1,5 +1,3 @@
-configfile: "data.yml"
-
 files = config.keys()
 
 rule all:

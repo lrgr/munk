@@ -27,7 +27,7 @@ Alternatively, you can install and build HANDL using PIP with the provided insta
 
 Once you have the dependencies installed, you can download our default datasets with the following command:
 
-    snakemake -s data/Snakefile -d data all
+    snakemake -s data/Snakefile -d data --configfile data/data.yml
 
 This data is used for experiments implemented in `experiments/` and described in Section 2 of [1]. Please see `data/README.md`, Section 4.4 or Section S2 of the Supplemental Information of [1] for more details.
 

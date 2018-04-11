@@ -15,5 +15,5 @@ install:
   - source activate HANDL
 
 script: 
-  - snakemake -s data/Snakefile -d data
+  - snakemake -s data/Snakefile -d data --configfile data/data-no-resnik.yml
   - snakemake all -s experiments/sl-prediction/Snakefile -d experiments/sl-prediction --configfile experiments/sl-prediction/configs/tiny.json
