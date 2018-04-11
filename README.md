@@ -1,7 +1,9 @@
 # Homology Assessment across Networks using Diffusion and Landmarks (HANDL)
+
 [![Build Status](https://travis-ci.org/lrgr/HANDL.svg?branch=master)](https://travis-ci.org/lrgr/HANDL)
 
 ## HANDL
+
 HANDL is an algorithm for embedding proteins in a target network (e.g. mouse) into a source network (e.g. from human). The HANDL algorithm was developed by Mark Crovella (Boston University), Benjamin Hescott (Northeastern University), and Max Leiserson (University of Maryland, College Park), and their respective research groups.
 
 ![HANDL method](notebooks/figures/handl-methods.png)
