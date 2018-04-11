@@ -1,10 +1,10 @@
 # Homology Assessment across Networks using Diffusion and Landmarks (HANDL)
+[![Build Status](https://travis-ci.org/lrgr/HANDL.svg?branch=master)](https://travis-ci.org/lrgr/HANDL)
 
 ## HANDL
 HANDL is an algorithm for embedding proteins in a target network (e.g. mouse) into a source network (e.g. from human). The HANDL algorithm was developed by Mark Crovella (Boston University), Benjamin Hescott (Northeastern University), and Max Leiserson (University of Maryland, College Park), and their respective research groups.
 
 ![HANDL method](notebooks/figures/handl-methods.png)
------
 
 ## Setup
 
@@ -21,8 +21,6 @@ Alternatively, you can install and build HANDL using PIP with the provided insta
 
     ./install_handl.sh
 
------
-
 ## Data
 
 Once you have the dependencies installed, you can download our default datasets with the following command:
@@ -30,8 +28,6 @@ Once you have the dependencies installed, you can download our default datasets 
     snakemake -s data/Snakefile -d data all
 
 This data is used for experiments implemented in `experiments/` and described in Section 2 of [1]. Please see `data/README.md`, Section 4.4 or Section S2 of the Supplemental Information of [1] for more details.
-
------
 
 ## Provided scripts
 
@@ -56,16 +52,12 @@ We provide a script, `compute_embeddings.py`, in the `scripts/` directory that c
 
 Please see `experiments/HANDL-embeddings-and-scores/` for  a simple example usage of `compute_embeddings.py` (with Snakemake).
 
------
-
 ## Jupyter Notebooks
 
 We also provide Jupyter notebooks, in the `notebooks/` directory to illustrate key concepts of the HANDL algorithm:
 
 * `HANDL-Demo.ipynb` - A notebook that illustrates the key concepts of HANDL and how HANDL is implemented
 * `Permutation-test.ipynb` - A notebook that shows how permutation tests can be performed to show that HANDL captures functional similarities, across species. from topological features and not only node degrees. (See section 2.3 in [1] for more details)
-
-----
 
 ## Experiments
 
