@@ -27,7 +27,7 @@ setup(
         'numpy>=1.14.0,<2.0.0',
         'scipy>=0.19.1,<1.0.0',
         'scikit-learn>=0.19.1,<1.0.0',
-        'networkx>=2.1,<3.0.0'
+        'networkx>=2.0,<3.0',
         ],
 
     project_urls={  # Optional

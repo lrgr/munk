@@ -178,14 +178,3 @@ def embed_networks(source_G, target_G, homologs, n_landmarks,
 def save_embeddings(X, nodes, landmarks, fp, weight=None):
     ''' Saves embedding data to given file '''
     joblib.dump(dict(X=X, nodes=nodes, landmarks=landmarks, weight=weight), fp)
-
-#def homologs_in_graphs(G1, G2, homologs):
-#    '''
-#    Computes list of homologs from a pair of graphs and a given list of
-#    homolog candidates
-#    '''
-#    G1_nodes = set(G1.nodes())
-#    G2_nodes = set(G2.nodes())
-#    valid_homologs = [(h1, h2) for h1, h2 in homologs \
-#                        if h1 in G1_nodes and h2 in G2_nodes]
-#    return valid_homologs

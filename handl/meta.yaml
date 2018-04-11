@@ -1,0 +1,25 @@
+package:
+  name: handl
+  version: '0.0'
+
+source:
+  path: .
+
+build:
+  script: python setup.py install --single-version-externally-managed --record=record.txt
+requirements:
+  build:
+    - python=3.6
+    - setuptools
+
+  run:
+    - python=3.6
+    - numpy=1.*
+    - scipy=1.*
+    - networkx=2.*
+    - scikit-learn=0.*
+
+about:
+  home: https://github.com/lrgr/handl
+  license: MIT
+  license_file: LICENSE

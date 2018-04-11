@@ -4,7 +4,6 @@
 import sys, os, numpy as np
 
 import networkx as nx 
-#import pandas as pd
 from sklearn import metrics
 from sklearn.externals import joblib
 
