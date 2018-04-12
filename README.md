@@ -1,6 +1,7 @@
 # Homology Assessment across Networks using Diffusion and Landmarks (HANDL)
 
 [![Build Status](https://travis-ci.org/lrgr/HANDL.svg?branch=master)](https://travis-ci.org/lrgr/HANDL)
+[![GitHub license](https://img.shields.io/github/license/lrgr/HANDL.svg)](https://github.com/lrgr/HANDL/blob/master/LICENSE)
 
 ## HANDL
 
