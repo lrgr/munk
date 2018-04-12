@@ -59,7 +59,6 @@ Please see `experiments/HANDL-embeddings-and-scores/` for  a simple example usag
 We also provide Jupyter notebooks, in the `notebooks/` directory to illustrate key concepts of the HANDL algorithm:
 
 * `HANDL-Demo.ipynb` - A notebook that illustrates the key concepts of HANDL and how HANDL is implemented
-* `Permutation-test.ipynb` - A notebook that shows how permutation tests can be performed to show that HANDL captures functional similarities, across species. from topological features and not only node degrees. (See section 2.3 in [1] for more details)
 
 ## Experiments
 
