@@ -85,11 +85,3 @@ homologs/human-sc/human-sc.txt: |
 homologs/mouse-sc/mouse-sc.txt: |
     https://obj.umiacs.umd.edu/lrgr/ppi-gi-data/homologs/mouse-sc/mouse-sc.txt 
 
-# Resnik Scores
-
-resnik_scores/human-mouse.npz: |
-    https://obj.umiacs.umd.edu/lrgr/handl/resnik_scores/resnik_scores/human-mouse.npz
-resnik_scores/human-sc.npz: |
-    https://obj.umiacs.umd.edu/lrgr/handl/resnik_scores/resnik_scores/human-sc.npz
-resnik_scores/mouse-sc.npz: |
-    https://obj.umiacs.umd.edu/lrgr/handl/resnik_scores/resnik_scores/mouse-sc.npz

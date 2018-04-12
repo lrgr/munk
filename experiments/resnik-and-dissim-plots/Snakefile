@@ -1,0 +1,100 @@
+
+
+SPECIES_A, SPECIES_B = config['species-A'], config['species-B']
+A_B_OUTPUT_DIR = 'output/{}-to-{}'.format(SPECIES_A, SPECIES_B)
+
+HANDL = '../../scripts/compute_embeddings.py'
+PLOT = 'plot_dissims.py'
+PLOT_RESNIK = 'plot_resnik_v_handl.py'
+
+# A to B embeddings and outputs
+A_B_source_embedding = '{}/{}-to-{}_{}-HANDL-embedding.pkl'.format(
+    A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B, SPECIES_A),
+A_B_target_embedding = '{}/{}-to-{}_{}-HANDL-embedding.pkl'.format(
+    A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B, SPECIES_B),
+A_B_sim_scores = '{}/{}-to-{}-HANDL-similarity-scores.pkl'.format(
+    A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B),
+A_B_landmark_list = '{}/{}-to-{}-HANDL-landmarks.tsv'.format(
+    A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B)
+A_B_runtimes = '{}/{}-to-{}-runtimes.json'.format(
+    A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B)
+A_B_plot = '{}/{}-to-{}-dissimilarity-scores.pdf'.format(
+    A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B)
+A_B_resnik_plot = '{}/{}-to-{}-resnik-plot.pdf'.format(
+    A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B)
+
+PLOTS = [A_B_plot]
+
+if not config.get('no-resnik', False):
+    PLOTS.append(A_B_resnik_plot)
+
+rule all:
+    input:
+        PLOTS
+    
+rule A_B_embed:
+    input:
+        A_ppi = config['A-ppi'],
+        B_ppi = config['B-ppi'],
+        A_B_homologs = config['A-to-B-homologs']
+    output:
+        source_embedding = A_B_source_embedding,
+        target_embedding = A_B_target_embedding,
+        sim_scores = A_B_sim_scores,
+        landmark_list = A_B_landmark_list,
+        runtimes = A_B_runtimes
+    params:
+        n_landmarks = config['n_landmarks']
+    log:
+        '{}/log/A_B_embed.log'.format(A_B_OUTPUT_DIR)
+    shell:
+        '''
+        python {HANDL} \
+            --source_edgelist {input.A_ppi} \
+            --target_edgelist {input.B_ppi} \
+            --homolog_list {input.A_B_homologs} \
+            --source_output_file {output.source_embedding} \
+            --target_output_file {output.target_embedding} \
+            --sim_scores_output_file {output.sim_scores} \
+            --landmarks_output_file {output.landmark_list} \
+            --runtimes_file {output.runtimes} \
+            --n_landmarks {params.n_landmarks} \
+            2>&1 | tee {log}
+        '''
+
+rule dissim_plot:
+    input:
+        A_B_sim_scores
+    output:
+        A_B_plot
+    params:
+        xmax=config.get('xmax', 0.6),
+        fs=config.get('font_size', 12),
+        lw=config.get('line_width', 2)
+    shell:
+        '''
+        python {PLOT} -i {input} -o {output} \
+            --xmax {params.xmax}\
+            -fs {params.fs}\
+            -lw {params.lw}\
+        '''
+
+rule resnik_plot:
+    input:
+        handl_scores = A_B_sim_scores,
+        resnik_scores = config.get('resnik-scores', '')
+    params:
+        fs=config.get('font_size', 12),
+        lw=config.get('line_width', 2)
+    output:
+        A_B_resnik_plot
+    shell:
+        '''
+        python {PLOT_RESNIK} -hs {input.handl_scores} -rs {input.resnik_scores}\
+            -o {output}\
+            -fs {params.fs}\
+            -lw {params.lw}\
+        '''
+    
+        
+

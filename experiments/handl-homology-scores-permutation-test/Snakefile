@@ -1,0 +1,106 @@
+import os
+GEN_RANDOM_NETWORK = 'gen_random_network.py'
+PERMTEST = 'permtest.py'
+SPECIES_A, SPECIES_B = config['A_species'], config['B_species']
+OUTPUT_DIR = 'output/{}-{}'.format(SPECIES_A, SPECIES_B)
+networks_dir_template = OUTPUT_DIR + '/{}-networks'
+A_networks_dir = networks_dir_template.format(SPECIES_A)
+B_networks_dir = networks_dir_template.format(SPECIES_B)
+
+network_list_template = '{}/{}-networks.tsv'
+A_network_list = network_list_template.format(A_networks_dir, SPECIES_A)
+B_network_list = network_list_template.format(B_networks_dir, SPECIES_B)
+
+network_template = '{out_dir}/{name}-networks/{name}-{i}.pkl'
+log_template = '{out_dir}/log/{name}-networks/{name}-{i}.log'
+results_template = '{out_dir}/{source_name}-to-{target_name}-permtest-results.json'
+diffs_template = '{out_dir}/{source_name}-to-{target_name}-permtest-diffs.pkl'
+perm_test_log_template = '{out_dir}/{source_name}-to-{target_name}-permtest.log'
+
+if config.get('test', False):
+    RESULTS = \
+        expand([results_template, diffs_template], \
+               out_dir = OUTPUT_DIR, \
+               source_name = SPECIES_A, \
+               target_name = SPECIES_B)
+    print('HERE')
+else:
+    RESULTS = \
+        expand([results_template, diffs_template], zip,\
+               out_dir = [OUTPUT_DIR] * 2, \
+               source_name = [SPECIES_A, SPECIES_B], \
+               target_name = [SPECIES_B, SPECIES_A])
+
+
+rule all:
+    input:
+        RESULTS
+
+rule permtest:
+    input:
+        source_random_network_data = \
+            lambda w: \
+                expand(network_template, \
+                    out_dir=OUTPUT_DIR, \
+                    name=w.source_name, \
+                    i=range(config['n_permutations'])),
+
+        target_random_network_data = \
+            lambda w: \
+                expand(network_template, \
+                    out_dir=OUTPUT_DIR, \
+                    name=w.target_name, \
+                    i=range(config['n_permutations'])),
+
+        source_ppi = lambda w: config['edgelists'][w.source_name],
+
+        target_ppi = lambda w: config['edgelists'][w.target_name],
+        homologs = lambda w: \
+            config['homologs']['{}-{}'.format(w.source_name, w.target_name)]
+    output:
+        json_results=results_template,
+        diffs=diffs_template
+    params:
+        n_landmarks = config['n_landmarks'], 
+        lam = config['lambda']
+    log:
+        perm_test_log_template
+    threads:
+       config['threads']
+    shell:
+        '''
+        python {PERMTEST} \
+            -s {input.source_ppi}\
+            -t {input.target_ppi}\
+            -hom {input.homologs}\
+            -nl {params.n_landmarks}\
+            -lam {params.lam} \
+            -sf {input.source_random_network_data}\
+            -tf {input.target_random_network_data}\
+            -o {output.json_results} \
+            -dof {output.diffs} \
+            -j {threads} \
+        2>&1 | tee {log}
+        '''
+
+rule rand_networks:
+    input:
+        expand(network_template, \
+                out_dir=OUTPUT_DIR, \
+                name=[SPECIES_A, SPECIES_B], \
+                i=range(config['n_permutations']))
+
+rule rand_network:
+    input:
+        lambda w: config['edgelists'][w.name]
+    output:
+        network_template
+    params:
+        n_tries = config['n_tries']
+    log:
+        log_template
+    shell:
+        '''
+        python {GEN_RANDOM_NETWORK} -e {input} -o {output} -nt {params.n_tries}
+        '''
+        

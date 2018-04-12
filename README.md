@@ -1,100 +1,90 @@
 # Homology Assessment across Networks using Diffusion and Landmarks (HANDL)
-![build status](https://travis-ci.org/lrgr/HANDL.svg?branch=master)
-### HANDL
-HANDL is an algorithm for embedding proteins in a target network (e.g. mouse) into a source network (e.g. from human). The HANDL algorithm was developed by Mark Crovella (Boston University), Benjamin Hescott (Northeastern University), and Max Leiserson (University of Maryland, College Park), and their respective research groups.
 
------
+[![Build Status](https://travis-ci.org/lrgr/HANDL.svg?branch=master)](https://travis-ci.org/lrgr/HANDL)
+[![GitHub license](https://img.shields.io/github/license/lrgr/HANDL.svg)](https://github.com/lrgr/HANDL/blob/master/LICENSE)
 
-### Setup
-#### Dependencies
-**Required Programs:** GNU Make, wget, Python 3, PIP, conda
+## HANDL
 
-**Python Packages:** Install required modules with `conda env create -f environment.yml`
+HANDL is an algorithm for embedding protein from a target network (e.g. mouse) into a source network (e.g. from human). The HANDL algorithm was developed by Mark Crovella (Boston University), Benjamin Hescott (Northeastern University), and Max Leiserson (University of Maryland, College Park), and their respective research groups.
 
-**Conda Environment:** Run `source activate HANDL` to work in `HANDL` conda environment
+![HANDL method](notebooks/figures/handl-methods.png)
 
-#### Data
-HANDL requires as input a source and target PPI network, and a list of homologs mapping a subset of the nodes in each network. We include scripts for downloading and processing data for _S. cerevisiae_ (_Sc_) and _S. pombe_ (_Sp_) networks and homologs, and mapping them into the same namespace.
+## Setup
 
-You can process the _Sc_ and _Sp_ data with the following commands.
+#### Install HANDL and other dependencies required to run experiments using Conda
 
-1. **Download and process UniProt accession ID mappings.** Run `make all` in `data/name_mapping`.
+We recommend users to install HANDL, along with other dependencies, into a python environment using [Conda](https://conda.io/miniconda.html). To install Python and other dependencies, which you can do directly using the provided `environment.yml file`:
 
-2. **Download and process Sc and Sp homologs from Homlogene.** Run `make all` in `data/homologs`.
+    conda env create -f environment.yml
+    source activate HANDL
 
-3. **Download and process BioGRID PPI networks.** Run `make all` in `data/ppi/biogrid`.
+This `HADNL` Conda environment can be used to run any number of experiments and examples included in this project/repository. We note that experiments and data download for other parts of this project are implemented and configured with [Snakemake](http://snakemake.readthedocs.io/en/stable/) which will be installed as part of the `HANDL` environment.
 
------
-### Usage - Scripts and command-line arguments
-**Compute RKHS factors/factorization of regularized Laplacian of PPI networks with:** `factorized_laplacian.py`
+#### Install HANDL using PIP as a standalone python package
+Alternatively, if you would like to install HANDL as a standalone python package, you can install and build HANDL using PIP with the provided install script. Simply execute:
 
-This script computes and saves the regularized Laplacian and factored RKHS embedding of a given PPI network. 
+    ./install_handl.sh
 
+## Data
 
-Required parameters:
+Once you have the dependencies installed, you can download our default datasets with the following command:
 
-*   `-e`, `--edge_file` : Path to PPI network edge list
-*   `-o`, `-output_file` : Path to where RKHS embedding should be saved
-*   `-df`, `--diffusion_file` : Path to where regularized Laplacian should be saved
-*   `-l`, `--lam` : Value of lambda in with respect to the regularized Laplacian
+    snakemake -s data/Snakefile -d data --configfile data/data.yml
 
-Outputs:
-The regularized Laplacian is saved to a Python dictionary with the following keys and values:
-* `D` :  A NumPy array containing the values of the regularized Laplacian
-* `nodes`: List of nodes/gene names corresponding to the rows and columns of the regularized Laplacian
+This data is used for experiments implemented in `experiments/` and described in Section 2 of [1]. Please see `data/README.md` or Sections 4.4 or S2 of [1] for more details.
 
-The RKHS embedding is saved to a Python dictionary with the following keys and values:
-* `X` :  A NumPy array containing the values of the RKHS embedding
-* `nodes`: List of nodes/gene names corresponding to the rows and columns of the RKHS embedding
+## Provided scripts
 
-**Compute HANDL embedding of target PPI network with:** `handl_embed.py`
+#### Computing HANDL embeddings with: compute_embeddings.py
+We provide a script, `compute_embeddings.py`, in the `scripts/` directory to allow users to easily compute HANDL embeddings and HANDL homology scores for nodes in and across PPI networks.
 
-This script computes and saves HANDL homology scores between a source and target PPI network and the HANDL embedding of the target PPI network, given the RKHS embedding of a source PPI network, the regularized Laplacian (graph kernel) of the target Network, and the list of orthologs (homologs) between the networks.
+`compute_embeddings.py` takes the following arguments:
 
-Note: other values such as the indices corresponding to Landmarks and the Landmarks used are also saved. Also, this script assumes that the given RKHS embeddings and regularized Laplacian is saved in the format outputted by `factorized_laplacian.py`.
+* `-se`, `--source_edgelist`: path to source species PPI edgelist
+* `-te`, `--target_edgelist`: path to target species PPI edgelist 
+* `-hf`, `--homolog_list`: path to list of homologs (a two column, tab separated list of homolog genes found in respective PPIs, with source genes in the first column and target genes in the second column)
+*  `n`, `--n_landmarks`: number of landmarks to use for HANDL embeddings
+* `-so`, `--source_output-file`: path to save source species HANDL embeddings
+* `-to`, `--target_output-file`: path to save target species HANDL embeddings
+* `-sim`, `--sim_scores_output_file`: path to save HANDL homology scores
+* `-lo`, `--landmarks_output_file`: path to save list of landmarks used for HANDL embeddings
+* `-r`, `--runtimes-file`:  path to save runtime statistics for HANDL
+* `--src_lam`: value of $\lambda$ to use for source species regularized Laplacian (optional, defaults to 0.05)
+* `--tgt_lam`, value of $\lambda$ Lambda to use for source species regularized Laplacian (optional, defaults to 0.05)
 
+`compute_embeddings.py` will save computed HANDL embeddings, HANDL homology scores, as well as other diagnostic information to specified file paths. Please see `experiments/HANDL-embeddings-and-scores/` for  a simple example that uses of `compute_embeddings.py` (with Snakemake).
 
-Required parameters:
+## Jupyter Notebooks
 
-*   `-s`, `--source_rkhs_file` :  Path to source PPI network RKHS embedding
-*   `-t`, `--target_laplacian_file` : Path to target PPI network regularized Laplacian
-*   `-hf`, `--homologs_file` : List of homologs between source and target
-*   `-o`, `--output_file` : Path to where HANDL embeddings and HANDL homology scores should be saved
-*   `-n`, `--n_landmarks` : Number of landmarks HANDL should use in the embedding
+We also provide a Jupyter notebook, in the `notebooks/` directory to illustrate key concepts of the HANDL algorithm:
 
-Output:
-The HANDL embedding is saved to a Python dictionary with the following keys and values:
-*   `D` : A NumPy array containing the HANDL homology scores
-*   `target_handl_C`: A NumPy array containing the values for the HANDL embedding of the target PPI network
-*   `source_C`: A NumPy array containing the values for the RKHS embedding of the source PPI network
-*   `target_nodes` : List of node/gene names corresponding to the rows and columns with respect to the target network and the saved matrices of embeddings/scores
-*   `source_nodes` : List of node/gene names corresponding to the rows and columns with respect to the target network and the saved matrices of embeddings/scores
-*   `target_landmarks` : List of node/gene names from the target used as landmarks 
-*   `source_landmarks` : List of node/gene names from the source used as landmarks
-*   `target_landmark_indices` : Indices of the rows of the HANDL embedding that corresponds to landmarks
-*   `source_landmark_indices` : Indices of the rows of the source RKHS embedding that correspond to landmarks
-*   `target_non_landmark_indices` : Indices of the rows of the HANDL embedding that correspond to homologs not used as landmarks
-*   `source_non_landmark_indices` : Indices of the rows of the source RKHS embedding that correspond to homologs not used as landmarks
+* `HANDL-Demo.ipynb` is a notebook that illustrates the key concepts of HANDL and demonstrates how HANDL is implemented
 
-#### File formats
-**Inputs for the scripts above:**
+## Experiments
 
-*   A **PPI network edge list** should be a 2 column tab separated file where each row is corresponds to an edge in the PPI network. For example, an edgelist might have a row that reads: `GENE_A GENE_B`
-*   A **Homolog list** should be a 2 column tab separated file where each row corresponds to a pair of homologs between a source and a target species. For example, a Homolog list might have a row that reads: `SOURCE_GENE_A TARGET_GENE_D`
+For the purpose of reproducibility,  we include source code for experiments described in [1] in the `experiments/` directory. Please refer to the README.md found in each experiments directory for more details. 
 
-**Outputs for the scripts above:**
-The Python dictionaries saved by the scripts above are saved/serialized using SciKit-Learn's JobLib module.
+A summary of what can be found in each directory is as as follows (we again note that each experiment is configured with Snakemake):
+* `HANDL-embeddings-and-scores` - An example usage and configuration of `scripts/compute_embeddings.py` using Snakemake
+* `sl-mapping-using-homologs-only` - Synthetic lethal interaction prediction baseline using homologs. (See section 2.5 in [1] for more details)
+* `resnik-and-dissim-plots` - Scripts to generate Figures 2a and 2b as well as figures in Section S5 in the Supplemental Infromation in [1]. (See section 2.3 in [1] for more details)
+* `handl-homology-scores-permutation-test` - Scripts to run the permutation test described in Section 2.3 in [1]. This experiment shows that HANDL captures shared biological (and topological) information in PPI networks beyond just node degree.
+* `sl-prediction` -Scripts to train classifiers to predict synthetic lethal interactions across species. (See section 2.5 in [1] for more details)
 
+## Acknowledgements
+
+This work was supported in part by NSF grants IIS-1421759 and CNS-1618207 (to M.C.) and by a grant from the Boston University Undergraduate Research Opportunities Program (to T.L.). We thank Simon Kasif, Evimaria Terzi, Prakash Ishwar, Lenore Cowen, Donna Slonim, and the Tufts BCB group for helpful discussion on this work. 
+
+We would also like to acknowledge the following open source projects/tools:
+
+ - [Snakemake](http://snakemake.readthedocs.io/en/stable/)
+ - [Travis CI](https://travis-ci.org/)
+ - [Scikit-Learn](http://scikit-learn.org/stable/)
+ - [Scipy.org](https://www.scipy.org/)
+
+that allow us to produce reproducible and clean experiments and implementations.
 
 
-#### Examples
-An example usage of HANDL can be found in `example/HANDL-homolog-scores` where the HANDL homology scores between proteins in fission (Sp) and baker's (Sc) yeast is computed.
-You can run the example with `snakemake`, where:
+## References
 
-*	The matrix of HANDL homology scores and HANDL embeddings with _Sc_ as the source and _Sp_ as the target will be computed and saved to `example/HANDL-homolog-scores/output/sp-to-sc-scores-and-matrices.pkl`
-*	The matrix of HANDL homology scores and HANDL embeddings with _Sp_ as the source and _Sc_ as the target will be computed and saved to `example/HANDL-homolog-scores/output/sc-to-sp-scores-and-matrices.pkl`
-*	The RKHS and regularized Laplacians used for HANDL embeddings are saved to `example/HANDL-homolog-scores/output/feats`.
-
------
-### Reference
-Jason Fan, Anthony Cannistra, Inbar Fried, Tim Lim, Thomas Schaffner, Mark Crovella, Benjamin Hescott*, Mark DM Leiserson*. "A Multi-Species Functional Embedding Integrating Sequence and Network Structure." _RECOMB 2018_ (to appear) [[bioRxiv]](https://www.biorxiv.org/content/early/2018/03/30/229211) * equal contribution
+[1] Jason Fan, Anthony Cannistra, Inbar Fried, Tim Lim, Thomas Schaffner, Mark Crovella, Benjamin Hescott*, Mark DM Leiserson*. "A Multi-Species Functional Embedding Integrating Sequence and Network Structure." _RECOMB 2018_ (to appear) [[bioRxiv]](https://www.biorxiv.org/content/early/2018/03/30/229211) * equal contribution

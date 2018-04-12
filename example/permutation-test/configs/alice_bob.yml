@@ -1,7 +1,0 @@
-A_species: alice
-B_species: bob
-edgelists:
-    alice: ../../data/toy/degree_sum_model/examples/alice_n100_d14/alice_n100_d14_ppi_edgelist.tsv
-    bob: ../../data/toy/degree_sum_model/examples/bob_n120_d14/bob_n120_d14_ppi_edgelist.tsv
-n_permutations: 50
-n_tries: 50

@@ -1,0 +1,105 @@
+
+SPECIES_A, SPECIES_B = config['species-A'], config['species-B']
+A_B_OUTPUT_DIR = 'output/{}-to-{}'.format(SPECIES_A, SPECIES_B)
+B_A_OUTPUT_DIR = 'output/{}-to-{}'.format(SPECIES_B, SPECIES_A)
+
+HANDL = '../../scripts/compute_embeddings.py'
+
+# A to B embeddings and outputs
+A_B_source_embedding = '{}/{}-to-{}_{}-HANDL-embedding.pkl'.format(
+    A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B, SPECIES_A),
+A_B_target_embedding = '{}/{}-to-{}_{}-HANDL-embedding.pkl'.format(
+    A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B, SPECIES_B),
+A_B_sim_scores = '{}/{}-to-{}-HANDL-similarity-scores.pkl'.format(
+    A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B),
+A_B_landmark_list = '{}/{}-to-{}-HANDL-landmarks.tsv'.format(
+    A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B)
+A_B_runtimes = '{}/{}-to-{}-runtimes.json'.format(
+    A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B)
+
+# B to A embeddings and outputs
+B_A_source_embedding = '{}/{}-to-{}_{}-HANDL-embedding.pkl'.format(
+    B_A_OUTPUT_DIR, SPECIES_B, SPECIES_A, SPECIES_B),
+B_A_target_embedding = '{}/{}-to-{}_{}-HANDL-embedding.pkl'.format(
+    B_A_OUTPUT_DIR, SPECIES_B, SPECIES_A, SPECIES_A),
+B_A_sim_scores = '{}/{}-to-{}-HANDL-similarity-scores.pkl'.format(
+    B_A_OUTPUT_DIR, SPECIES_B, SPECIES_A),
+B_A_landmark_list = '{}/{}-to-{}-HANDL-landmarks.tsv'.format(
+    B_A_OUTPUT_DIR, SPECIES_B, SPECIES_A)
+B_A_runtimes = '{}/{}-to-{}-HANDL-runtimes.json'.format(
+    B_A_OUTPUT_DIR, SPECIES_B, SPECIES_A)
+
+
+rule all:
+    input:
+         A_B_source_embedding,
+         A_B_target_embedding,
+         A_B_sim_scores,
+         A_B_landmark_list,
+         A_B_runtimes,
+
+         B_A_source_embedding,
+         B_A_target_embedding,
+         B_A_sim_scores,
+         B_A_landmark_list,
+         B_A_runtimes,
+    
+rule A_B_embed:
+    input:
+        A_ppi = config['A-ppi'],
+        B_ppi = config['B-ppi'],
+        A_B_homologs = config['A-to-B-homologs']
+    output:
+        source_embedding = A_B_source_embedding,
+        target_embedding = A_B_target_embedding,
+        sim_scores = A_B_sim_scores,
+        landmark_list = A_B_landmark_list,
+        runtimes = A_B_runtimes
+    params:
+        n_landmarks = config['n_landmarks']
+    log:
+        '{}/log/A_B_embed.log'.format(A_B_OUTPUT_DIR)
+    shell:
+        '''
+        python {HANDL} \
+            --source_edgelist {input.A_ppi} \
+            --target_edgelist {input.B_ppi} \
+            --homolog_list {input.A_B_homologs} \
+            --source_output_file {output.source_embedding} \
+            --target_output_file {output.target_embedding} \
+            --sim_scores_output_file {output.sim_scores} \
+            --landmarks_output_file {output.landmark_list} \
+            --runtimes_file {output.runtimes} \
+            --n_landmarks {params.n_landmarks} \
+            2>&1 | tee {log}
+        '''
+
+rule B_A_embed:
+    input:
+        A_ppi = config['A-ppi'],
+        B_ppi = config['B-ppi'],
+        B_A_homologs = config['B-to-A-homologs']
+    output:
+        source_embedding = B_A_source_embedding,
+        target_embedding = B_A_target_embedding,
+        sim_scores = B_A_sim_scores,
+        landmark_list = B_A_landmark_list,
+        runtimes = B_A_runtimes
+    params:
+        n_landmarks = config['n_landmarks']
+    log:
+        '{}/log/B_A_embed.log'.format(B_A_OUTPUT_DIR)
+    shell:
+        '''
+        python {HANDL} \
+            --source_edgelist {input.B_ppi} \
+            --target_edgelist {input.A_ppi} \
+            --homolog_list {input.B_A_homologs} \
+            --source_output_file {output.source_embedding} \
+            --target_output_file {output.target_embedding} \
+            --sim_scores_output_file {output.sim_scores} \
+            --landmarks_output_file {output.landmark_list} \
+            --runtimes_file {output.runtimes} \
+            --n_landmarks {params.n_landmarks} \
+            2>&1 | tee {log}
+        '''

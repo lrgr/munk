@@ -16,3 +16,5 @@ dependencies:
   - snakemake=4.*
   - jupyter
   - unzip
+  - pip:
+    - ./handl

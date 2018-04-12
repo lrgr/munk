@@ -1,0 +1,35 @@
+from os.path import join
+
+HOMOLOG_MAPPING = 'homolog_mapping_table.py'
+OUTPUT_DIR = 'output'
+
+rule all:
+    input:
+        A_gis= config['A']['gi'],
+        A_ppis= config['A']['ppi'],
+        B_gis= config['B']['gi'],
+        B_ppis= config['B']['ppi'],
+        homs= config['homologs']
+    params:
+        A_name= config['A']['name'],
+        B_name= config['B']['name'],
+        A_data_name= config['A']['data-name'],
+        B_data_name= config['B']['data-name'],
+        sample_negs = '-s' if config.get('sample-negs') else ''
+    output:
+        join(OUTPUT_DIR, '{}-homolog-mapping-results-table.tsv'.format(config['run-name']))
+    shell:
+        '''
+        python {HOMOLOG_MAPPING}\
+            -saf {input.A_gis}\
+            -sbf {input.B_gis}\
+            -sap {input.A_ppis}\
+            -sbp {input.B_ppis}\
+            -san {params.A_data_name}\
+            -sbn {params.B_data_name}\
+            -sn  {params.A_name} {params.B_name}\
+            -hmf {input.homs}\
+            -of  {output}\
+            {params.sample_negs}
+        '''
+        
