@@ -53,6 +53,6 @@ Pre-computed Resnik scores between human-mouse, human-sc, and mouse-sc genes are
 
 [3] Sean R Collins, Kyle M Miller, Nancy L Maas, Assen Roguev, Jeffrey Fillingham, et al. "Functional dissection of protein complexes involved in yeast chromosome biology using a genetic interaction map".  _Nature_, 446(7137):806– 810, 7 2007
 
-[4] Roguev, Sourav Bandyopadhyay, Martin Zofall, Ke Zhang, Tamas Fischer, et al. "Conservation and rewiring of functional modules revealed by an epistasis map in fission yeast".  _Science_, 322(5900):405–410, 8 2008.
+[4] Assen Roguev, Sourav Bandyopadhyay, Martin Zofall, Ke Zhang, Tamas Fischer, et al. "Conservation and rewiring of functional modules revealed by an epistasis map in fission yeast".  _Science_, 322(5900):405–410, 8 2008.
 
 [5] Eric W Sayers, Tanya Barrett, Dennis A Benson, Evan Bolton, Stephen H Bryant, et al. "Database resources of the national center for biotechnology information". _Nucleic acids research_, 39(suppl 1):D38–D51, 2011.

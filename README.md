@@ -66,13 +66,25 @@ For the purpose of reproducibility,  we include source code for experiments desc
 
 A summary of what can be found in each directory is as as follows (we again note that each experiment is configured with Snakemake):
 * `HANDL-embeddings-and-scores` - An example usage and configuration of `scripts/compute_embeddings.py` using Snakemake
-* `homolog-baseline` - Synthetic lethal interaction prediction baseline using homologs. (See section 2.5 in [1] for more details)
+* `sl-mapping-using-homologs-only` - Synthetic lethal interaction prediction baseline using homologs. (See section 2.5 in [1] for more details)
 * `resnik-and-dissim-plots` - Scripts to generate Figures 2a and 2b as well as figures in Section S5 in the Supplemental Infromation in [1]. (See section 2.3 in [1] for more details)
-* `permutation-test` - Scripts to run the permutation test described in Section 2.3 in [1]
+* `handl-homology-scores-permutation-test` - Scripts to run the permutation test described in Section 2.3 in [1]. This experiment shows that HANDL captures shared biological (and topological) information in PPI networks beyond just node degree.
 * `sl-prediction` -Scripts to train classifiers to predict synthetic lethal interactions across species. (See section 2.5 in [1] for more details)
 
------
+## Acknowledgements
 
-## Reference
+This work was supported in part by NSF grants IIS-1421759 and CNS-1618207 (to M.C.) and by a grant from the Boston University Undergraduate Research Opportunities Program (to T.L.). We thank Simon Kasif, Evimaria Terzi, Prakash Ishwar, Lenore Cowen, Donna Slonim, and the Tufts BCB group for helpful discussion on this work. 
+
+We would also like to acknowledge the following open source projects/tools:
+
+ - [Snakemake](http://snakemake.readthedocs.io/en/stable/)
+ - [Travis CI](https://travis-ci.org/)
+ - [Scikit-Learn](http://scikit-learn.org/stable/)
+ - [Scipy.org](https://www.scipy.org/)
+
+that allow us to produce reproducible and clean experiments and implementations.
+
+
+## References
 
 [1] Jason Fan, Anthony Cannistra, Inbar Fried, Tim Lim, Thomas Schaffner, Mark Crovella, Benjamin Hescott*, Mark DM Leiserson*. "A Multi-Species Functional Embedding Integrating Sequence and Network Structure." _RECOMB 2018_ (to appear) [[bioRxiv]](https://www.biorxiv.org/content/early/2018/03/30/229211) * equal contribution

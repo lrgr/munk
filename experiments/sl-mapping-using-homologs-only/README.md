@@ -67,7 +67,7 @@ Note that inconclusive GIs are excluded (Please see [1] section 4.4 for more det
 
 [1] Jason Fan, Anthony Cannistra, Inbar Fried, Tim Lim, Thomas Schaffner, Mark Crovella, Benjamin Hescott*, Mark DM Leiserson*. "A Multi-Species Functional Embedding Integrating Sequence and Network Structure."  _RECOMB 2018_(to appear)  [[bioRxiv]](https://www.biorxiv.org/content/early/2018/03/30/229211)  * equal contribution.
 
-[2] Roguev, Sourav Bandyopadhyay, Martin Zofall, Ke Zhang, Tamas Fischer, et al. "Conservation and rewiring of functional modules revealed by an epistasis map in fission yeast".  _Science_, 322(5900):405–410, 8 2008.
+[2] Assen Roguev, Sourav Bandyopadhyay, Martin Zofall, Ke Zhang, Tamas Fischer, et al. "Conservation and rewiring of functional modules revealed by an epistasis map in fission yeast".  _Science_, 322(5900):405–410, 8 2008.
 
 [3] Sean R Collins, Kyle M Miller, Nancy L Maas, Assen Roguev, Jeffrey Fillingham, et al. "Functional dissection of protein complexes involved in yeast chromosome biology using a genetic interaction map".  _Nature_, 446(7137):806– 810, 7 2007
 
