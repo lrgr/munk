@@ -1,10 +1,10 @@
 # Default Data files for examples and experiments
 
-Data used for examples and experiments in this project/repository have been pre-processed and hosted by our research group. The data required for the experiments in this project can be downloaded with:
+Data used for examples and experiments in this project/repository have been pre-processed and hosted by our research group. The data required for all the experiments in this project can be downloaded with:
 
 	snakemake all --configfile data.yml
 
-Note that we include, as part of the default dataset,  pre-computed resnik scores that are large in size. If you do not need the resnik scores, you can instead run:
+Note that we include, as part of the default dataset,  pre-computed resnik scores that are large in size. If you do not need the resnik scores and would like to save disk space, you can instead run:
 	
 	snakemake all --configfile data-no-resnik.yml
 
@@ -17,7 +17,7 @@ for complete details.
 
 ## A note on UniProt assession IDs
 
-**Note that for _S.c_ and _S.p_ some downloaded files have been pre-processed so that gene/protein names are mapped to UniProt assecssion IDs [1]. These files will contain `-std` in the file names.**
+** Please note that for _S.c_ and _S.p_ some downloaded files have been pre-processed so that gene/protein names are mapped to UniProt assecssion IDs [1]. These files contain `-std` in their file names.**
 
 ## PPI networks for _S.p_, _S.c_, human and mouse.
 
@@ -39,8 +39,8 @@ Homolog lists (as processed from Homologene [5]) between the species, _S.c_, _S.
 ## Synthetic data
 
 Synthetic (toy) data for two synthetic species will be downloaded to `toy/degree_sum_model/examples`. The synthetic PPI data is generated with the barabasi-albert model and two genes are determined to be SL if the sum of their degrees is greater than 14. The respective synthetic PPI networks and GI data can be found in:
-* `toy/degree_sum_model/examples/alice_n100_d14`: for a species named alice with 100 genes/proteins
-* `toy/degree_sum_model/examples/bob_n120_d14`: for a species named bob with 120 genes/proteins
+* `toy/degree_sum_model/examples/alice_n100_d14`: for a species named _alice_ with 100 genes/proteins
+* `toy/degree_sum_model/examples/bob_n120_d14`: for a species named _bob_ with 120 genes/proteins
 
 ## Pre-computed Resnik scores
 

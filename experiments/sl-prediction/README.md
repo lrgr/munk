@@ -21,11 +21,11 @@ with a provided configuration file.
 
 We provide configuration files in `configs/` that correspond to experiments and results reported in [1].
 
-*  `collins-roguev-rf.yml`, `collins-roguev-svm.yml`  - SL prediction using GI/SL data from Collins et. Al [2] and Roguev et. Al [3] for _S.c_ and _S.p_, respectively; using random forests and SVMs, respectively.
-*  `biogrid.v3.4.157-rf.yml`, `biogrid.v3.4.157-svm.yml`-SL prediction using GI/SL data from BioGRID release v3.4.157 for _S.c_ and _S.p_, respectively; using random forests and SVMs, respectively. Non SLs are sampled from cartesian product of nodes obtained from PPI networks.
+*  `collins-roguev-rf.yml`, `collins-roguev-svm.yml`  - SL prediction using GI/SL data from Collins et. Al [2] and Roguev et. Al [3] for _S.c_ and _S.p_,  using random forests and SVMs, respectively.
+*  `biogrid.v3.4.157-rf.yml`, `biogrid.v3.4.157-svm.yml`-SL prediction using GI/SL data from BioGRID release v3.4.157 for _S.c_ and _S.p_, using random forests and SVMs, respectively. Non-SLs are sampled from pairs nodes, obtained from PPI networks, that do not have SLs.
 * `toy-rf.yml`, `toy-svm.yml`-SL prediction using synthetic data using random forests and SVMs, respectively. 
 Note that inconclusive GIs are excluded
-* `tiny.yml`- SL prediction using synthetic data using random forests with a single tree. Because the experiments in this directory can be time consuming, we include a configuration file to configure a run that executes quickly; this configuration can be used for sanity checking (and is used for continuous integration).
+* `tiny.yml`- SL prediction using synthetic data using random forests with a single tree. Because the experiments in this directory can be time consuming, we include a configuration file to configure a run that executes quickly; this configuration can be used for sanity checking.
 
 ## Configuration
 
@@ -42,6 +42,7 @@ This experiment is implemented with [Snakemake](http://snakemake.readthedocs.io/
 		"B": "<Path to homolog list (A to B)>"
 		}
 	},
+
 "B": {
 "name": "<Name of species B>",
 "ppi": "<Path to species B PPI network>",
@@ -50,19 +51,23 @@ This experiment is implemented with [Snakemake](http://snakemake.readthedocs.io/
 	"A": "<Path to homolog list (B to A)"
 	}
 },
+
 "n_landmarks": 400, // Number of landmarks for HANDL
 "dataset_name": "<name of dataset (note that this is used as a prefix for the output directory)>",
+
 
 // List of different cross-validation (C.V) strategies to test/run.
 //     "pairs" --> C.V on gene pairs
 //     "genes" --> C.V over individual genes
 "hold_outs": ["genes", "pairs"],
 
+
 // Different strategies for training classifier to test/run.
 //     "both" --> train on both species simultaneously
 //     "src"  --> train on source species (defaults to species A) only
 //     "src"  --> train on target species (defaults to species B) only
 "train_data": ["both", "src", "tgt"],
+
 
 // Whether or not to sample negatives at random from pairs not seen in given GI files.
 "sinatra_featurize": true,
@@ -74,15 +79,6 @@ This experiment is implemented with [Snakemake](http://snakemake.readthedocs.io/
 "classifier": "rf"
 }
 ```
-
-### Provided config files
-
-We provide configuration files in `configs/` that correspond to experiments and results reported in [1].
-
-*  `collins-roguev.yml` - Configuration for SL prediction baseline using GI/SL data from Collins et. Al [2] and Roguev et. Al  [3] for _S.c_ and _S.p_ respectively.
-*  `biogrid.v3.4.157`- Configuration for SL prediction baseline using GI/SL data from BioGRID [4] release v3.4.157 for _S.c_ and _S.p_ respectively. Non SLs are sampled from cartesian product of nodes obtained from PPI networks
-
-Note that inconclusive GIs are excluded (Please see [1] section 4.4 for more details.)
 
 ## Reference
 

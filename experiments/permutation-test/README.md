@@ -22,12 +22,11 @@ This permutation test is configured and implemented with [Snakemake](http://snak
 
 	snakemake all --configfile configs/sc-sp.yml
 
-To generate random networks (quickly) in parallel using a cluster, you can run:
+We also include the option to speed up the process of generating networks for our permutation test by including a scipt to generate permuted networks (quickly) in parallel using a SLURM cluster. If you would like to generate permuted networks quickly and in parallel before you run the permutation test with Snakemake (as described above), you first can execute the following command **before** you run `snakemake all --configfile configs/sc-sp.yml`:
 
 	sh gen_graphs_with_slurm.sh configs/sc-sp.yml
-beforehand.
 
-Note that because generating 1000 random networks, as in [1], can be time consuming  other configuration files for sanity checking with synthetic data (`configs/alice-bob.yml`) or with fewer networks (`configs/sc-sp-test.yml`) are also available.
+Morevoer, because generating 1000 random networks, as in [1], can be time consuming, we have included other config files that configure permutation test runs for sanity checking/testing. These runs can be performed with synthetic data (using `configs/alice-bob.yml`) or with fewer permuted networks (with `configs/sc-sp-test.yml`).
 
 ## Scripts:
 

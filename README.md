@@ -4,7 +4,7 @@
 
 ## HANDL
 
-HANDL is an algorithm for embedding proteins in a target network (e.g. mouse) into a source network (e.g. from human). The HANDL algorithm was developed by Mark Crovella (Boston University), Benjamin Hescott (Northeastern University), and Max Leiserson (University of Maryland, College Park), and their respective research groups.
+HANDL is an algorithm for embedding protein from a target network (e.g. mouse) into a source network (e.g. from human). The HANDL algorithm was developed by Mark Crovella (Boston University), Benjamin Hescott (Northeastern University), and Max Leiserson (University of Maryland, College Park), and their respective research groups.
 
 ![HANDL method](notebooks/figures/handl-methods.png)
 
@@ -12,14 +12,15 @@ HANDL is an algorithm for embedding proteins in a target network (e.g. mouse) in
 
 #### Install HANDL and other dependencies required to run experiments using Conda
 
-This is our recommended way to install HANDL. We recommend using [Conda
-](https://conda.io/miniconda.html) to install Python and other dependencies, which you can do directly using the provided `environment.yml file`:
+We recommend users to install HANDL, along with other dependencies, into a python environment using [Conda](https://conda.io/miniconda.html). To install Python and other dependencies, which you can do directly using the provided `environment.yml file`:
 
     conda env create -f environment.yml
     source activate HANDL
 
+This `HADNL` Conda environment can be used to run any number of experiments and examples included in this project/repository. We note that experiments and data download for other parts of this project are implemented and configured with [Snakemake](http://snakemake.readthedocs.io/en/stable/) which will be installed as part of the `HANDL` environment.
+
 #### Install HANDL using PIP as a standalone python package
-Alternatively, you can install and build HANDL using PIP with the provided install script. Simply execute:
+Alternatively, if you would like to install HANDL as a standalone python package, you can install and build HANDL using PIP with the provided install script. Simply execute:
 
     ./install_handl.sh
 
@@ -29,14 +30,14 @@ Once you have the dependencies installed, you can download our default datasets 
 
     snakemake -s data/Snakefile -d data --configfile data/data.yml
 
-This data is used for experiments implemented in `experiments/` and described in Section 2 of [1]. Please see `data/README.md`, Section 4.4 or Section S2 of the Supplemental Information of [1] for more details.
+This data is used for experiments implemented in `experiments/` and described in Section 2 of [1]. Please see `data/README.md` or Sections 4.4 or S2 of [1] for more details.
 
 ## Provided scripts
 
 #### Computing HANDL embeddings with: compute_embeddings.py
-We provide a script, `compute_embeddings.py`, in the `scripts/` directory that computes HANDL embeddings of nodes in PPI networks.
+We provide a script, `compute_embeddings.py`, in the `scripts/` directory to allow users to easily compute HANDL embeddings and HANDL homology scores for nodes in and across PPI networks.
 
-*Arguments*:
+`compute_embeddings.py` takes the following arguments:
 
 * `-se`, `--source_edgelist`: path to source species PPI edgelist
 * `-te`, `--target_edgelist`: path to target species PPI edgelist 
@@ -50,21 +51,19 @@ We provide a script, `compute_embeddings.py`, in the `scripts/` directory that c
 * `--src_lam`: value of $\lambda$ to use for source species regularized Laplacian (optional, defaults to 0.05)
 * `--tgt_lam`, value of $\lambda$ Lambda to use for source species regularized Laplacian (optional, defaults to 0.05)
 
-*Example usage*:
-
-Please see `experiments/HANDL-embeddings-and-scores/` for  a simple example usage of `compute_embeddings.py` (with Snakemake).
+`compute_embeddings.py` will save computed HANDL embeddings, HANDL homology scores, as well as other diagnostic information to specified file paths. Please see `experiments/HANDL-embeddings-and-scores/` for  a simple example that uses of `compute_embeddings.py` (with Snakemake).
 
 ## Jupyter Notebooks
 
-We also provide Jupyter notebooks, in the `notebooks/` directory to illustrate key concepts of the HANDL algorithm:
+We also provide a Jupyter notebook, in the `notebooks/` directory to illustrate key concepts of the HANDL algorithm:
 
-* `HANDL-Demo.ipynb` - A notebook that illustrates the key concepts of HANDL and how HANDL is implemented
+* `HANDL-Demo.ipynb` is a notebook that illustrates the key concepts of HANDL and demonstrates how HANDL is implemented
 
 ## Experiments
 
 For the purpose of reproducibility,  we include source code for experiments described in [1] in the `experiments/` directory. Please refer to the README.md found in each experiments directory for more details. 
 
-A summary of what can be found in each directory is as as follows, note that each experiment is configured with Snakemake:
+A summary of what can be found in each directory is as as follows (we again note that each experiment is configured with Snakemake):
 * `HANDL-embeddings-and-scores` - An example usage and configuration of `scripts/compute_embeddings.py` using Snakemake
 * `homolog-baseline` - Synthetic lethal interaction prediction baseline using homologs. (See section 2.5 in [1] for more details)
 * `resnik-and-dissim-plots` - Scripts to generate Figures 2a and 2b as well as figures in Section S5 in the Supplemental Infromation in [1]. (See section 2.3 in [1] for more details)

@@ -19,11 +19,11 @@ Files following similar naming schemes containing HANDL Embeddings and HANDL hom
 
 ### Configuration:
 
-Execution of the experiment/script is implemented/written with [Snakemake](http://snakemake.readthedocs.io/en/latest/index.html) and is configured by a given [config file] http://snakemake.readthedocs.io/en/latest/snakefiles/configuration.html?highlight=config%20file.
+Execution of the experiment/script is implemented/written with [Snakemake](http://snakemake.readthedocs.io/en/latest/index.html) and is configured by a given [config file](http://snakemake.readthedocs.io/en/latest/snakefiles/configuration.html?highlight=config%20file).
 
-The provided configuration file should provide information for a pair of species (A and B), and the included Snakefile will compute HANDL embeddings from A to B, and from B to A.
+The provided configuration file should provide information for a pair of species, A and B, and the included Snakefile will compute HANDL embeddings from A to B, and from B to A.
 
-A configuration file can be defined as follows:
+A configuration file in YAML format can be defined as follows:
 ```YAML
 # An example configuration file in YAML format for HANDL embeddings between S.c and S.p
 
