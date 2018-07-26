@@ -1,6 +1,6 @@
 package:
-  name: handl
-  version: '0.0'
+  name: munk
+  version: '0.1'
 
 source:
   path: .
@@ -20,6 +20,6 @@ requirements:
     - scikit-learn=0.*
 
 about:
-  home: https://github.com/lrgr/handl
+  home: https://github.com/lrgr/munk
   license: MIT
   license_file: LICENSE

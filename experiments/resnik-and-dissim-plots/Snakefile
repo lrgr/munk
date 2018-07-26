@@ -3,18 +3,18 @@
 SPECIES_A, SPECIES_B = config['species-A'], config['species-B']
 A_B_OUTPUT_DIR = 'output/{}-to-{}'.format(SPECIES_A, SPECIES_B)
 
-HANDL = '../../scripts/compute_embeddings.py'
+MUNK = '../../scripts/compute_embeddings.py'
 PLOT = 'plot_dissims.py'
-PLOT_RESNIK = 'plot_resnik_v_handl.py'
+PLOT_RESNIK = 'plot_resnik_v_munk.py'
 
 # A to B embeddings and outputs
-A_B_source_embedding = '{}/{}-to-{}_{}-HANDL-embedding.pkl'.format(
+A_B_source_embedding = '{}/{}-to-{}_{}-MUNK-embedding.pkl'.format(
     A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B, SPECIES_A),
-A_B_target_embedding = '{}/{}-to-{}_{}-HANDL-embedding.pkl'.format(
+A_B_target_embedding = '{}/{}-to-{}_{}-MUNK-embedding.pkl'.format(
     A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B, SPECIES_B),
-A_B_sim_scores = '{}/{}-to-{}-HANDL-similarity-scores.pkl'.format(
+A_B_sim_scores = '{}/{}-to-{}-MUNK-similarity-scores.pkl'.format(
     A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B),
-A_B_landmark_list = '{}/{}-to-{}-HANDL-landmarks.tsv'.format(
+A_B_landmark_list = '{}/{}-to-{}-MUNK-landmarks.tsv'.format(
     A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B)
 A_B_runtimes = '{}/{}-to-{}-runtimes.json'.format(
     A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B)
@@ -31,7 +31,7 @@ if not config.get('no-resnik', False):
 rule all:
     input:
         PLOTS
-    
+
 rule A_B_embed:
     input:
         A_ppi = config['A-ppi'],
@@ -49,7 +49,7 @@ rule A_B_embed:
         '{}/log/A_B_embed.log'.format(A_B_OUTPUT_DIR)
     shell:
         '''
-        python {HANDL} \
+        python {MUNK} \
             --source_edgelist {input.A_ppi} \
             --target_edgelist {input.B_ppi} \
             --homolog_list {input.A_B_homologs} \
@@ -81,7 +81,7 @@ rule dissim_plot:
 
 rule resnik_plot:
     input:
-        handl_scores = A_B_sim_scores,
+        munk_scores = A_B_sim_scores,
         resnik_scores = config.get('resnik-scores', '')
     params:
         fs=config.get('font_size', 12),
@@ -90,11 +90,8 @@ rule resnik_plot:
         A_B_resnik_plot
     shell:
         '''
-        python {PLOT_RESNIK} -hs {input.handl_scores} -rs {input.resnik_scores}\
+        python {PLOT_RESNIK} -ms {input.munk_scores} -rs {input.resnik_scores}\
             -o {output}\
             -fs {params.fs}\
             -lw {params.lw}\
         '''
-    
-        
-

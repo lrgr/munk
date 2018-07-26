@@ -1,11 +1,11 @@
-# Permutation tests showing that HANDL captures shared biological information beyond node degree
+# Permutation tests showing that MUNK captures shared biological information beyond node degree
 
 See [1] section 2.3 for more complete details.
 
 This experiment/directory contains implementation and scripts used to perform permutation tests in [1] section 2.3.
 
 The experiment is described in [1] as follows:
-> "We assess the statistical significance of the difference in Handl
+> "We assess the statistical significance of the difference in MUNK
 > homology scores between homologous and non-homologous pairs by
 > generating 1000 pairs of random networks in which each node is given
 > degree very close to that in the original network, but in which edges
@@ -13,7 +13,7 @@ The experiment is described in [1] as follows:
 > al [2] to generate graphs with given degree distributions and remove
 > self loops and parallel edges afterwards. We then compute an empirical
 > P-value by counting the number of pairs of random networks for which
-> the difference in mean Handl homology scores between homologs and
+> the difference in mean MUNK homology scores between homologs and
 > non-homologs is greater than that observed in real PPI networks."
 
 ## Usage
@@ -31,24 +31,24 @@ Morevoer, because generating 1000 random networks, as in [1], can be time consum
 ## Scripts:
 
 Python scripts:
-* [`gen_random_network.py`](https://github.com/lrgr/HANDL/blob/master/experiments/permutation-test/gen_random_network.py): A script to generate and save a single random network conditioned on the node degree distribution of a given "real" network. The parameters are as follows:
+* [`gen_random_network.py`](https://github.com/lrgr/munk/blob/master/experiments/permutation-test/gen_random_network.py): A script to generate and save a single random network conditioned on the node degree distribution of a given "real" network. The parameters are as follows:
 	* `-e`, `--edgelist`: PPI edgelist of seed/real network to permute/randomize
 	* `-o`, `--output`: Output path
 	* `-n`, `--n_tries`: Number of attempts to try to generate random network. (Note that sometimes the random network generation procedure will generate networks with fewer nodes than that of the the real/seed network. We count these instances as errors and this parameter sets how many times the script should repeat until it successfully generates a random/permuted network.)
-* [`permtest.py`](https://github.com/lrgr/HANDL/blob/master/experiments/permutation-test/gen_random_network.py): A script to run the permutation test.
+* [`permtest.py`](https://github.com/lrgr/munk/blob/master/experiments/permutation-test/gen_random_network.py): A script to run the permutation test.
 	* `-s'`, `--source_edgelist`: PPI edgelist of the "real" source species PPI network
 	* `-t'`, `--target_edgelist`: PPI edgelist of the "real" target species PPI network
 	* `-hom'`, `--homolog_list`: Tab separated list of homolog pairs between source and target species
-	* `-nl'`, `--n_landmarks`: Number of landmarks for computing HANDL homology scores
-	* `-lam`, `--lam`: $\lambda$ value to use for regularized laplacians within HANDL
-	* `-sf'`, `--source_data_files`: list of randomized/permuted source networks (as outputted by [`gen_random_network.py`](https://github.com/lrgr/HANDL/blob/master/experiments/permutation-test/gen_random_network.py)).
-	* `-tg'`, `--target_data_files`: list of randomized/permuted target networks (as outputted by [`gen_random_network.py`](https://github.com/lrgr/HANDL/blob/master/experiments/permutation-test/gen_random_network.py)).
+	* `-nl'`, `--n_landmarks`: Number of landmarks for computing MUNK homology scores
+	* `-lam`, `--lam`: $\lambda$ value to use for regularized laplacians within MUNK
+	* `-sf'`, `--source_data_files`: list of randomized/permuted source networks (as outputted by [`gen_random_network.py`](https://github.com/lrgr/munk/blob/master/experiments/permutation-test/gen_random_network.py)).
+	* `-tg'`, `--target_data_files`: list of randomized/permuted target networks (as outputted by [`gen_random_network.py`](https://github.com/lrgr/munk/blob/master/experiments/permutation-test/gen_random_network.py)).
 	* `-o'`, `--output_file`: path to save results.
 	* `-dof'`, `--diffs_output_file`: path to pickle detailed results/data
 	* `-j'`, `--n_jobs`: number of cores/threads to use
 
 Shell script for generating random networks using a SLURM cluster
-* [`gen_graphs_with_slurm.sh`](https://github.com/lrgr/HANDL/blob/handl-package/experiments/permutation-test/gen_graphs_with_slurm.sh): Use a cluster, as defined in `cluster.yml` to generate many random networks in parallel!
+* [`gen_graphs_with_slurm.sh`](https://github.com/lrgr/munk/blob/munk-package/experiments/permutation-test/gen_graphs_with_slurm.sh): Use a cluster, as defined in `cluster.yml` to generate many random networks in parallel!
 	* To generate random networks for a permutation test configured with a configuration file, simply execute: `gen_graphs_with_slurm.sh <config file>`.
 
 ## References

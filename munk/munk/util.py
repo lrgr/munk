@@ -3,14 +3,14 @@
 # Load required modules
 import sys, os, numpy as np
 
-import networkx as nx 
+import networkx as nx
 from sklearn import metrics
 from sklearn.externals import joblib
 
-from handl.io import get_logger
+from munk.io import get_logger
 
 def simplify_graph(G, verbose=True):
-    ''' 
+    '''
     Returns the simple/strict graph corresponding to given graph
     (Removes self loops from G and returns largest connected component)
     '''
@@ -22,7 +22,7 @@ def simplify_graph(G, verbose=True):
         cc_sizes.remove(largest_cc)
         if verbose:
             logger.warning('Network has %d connected components', len(cc_list))
-            logger.warning('\tLargest is size %d and all the rest are %d or smaller', 
+            logger.warning('\tLargest is size %d and all the rest are %d or smaller',
                 largest_cc, max(cc_sizes))
             logger.warning('\tUsing largest connected component')
 
@@ -46,9 +46,9 @@ def simple_two_core(G, verbose=True):
     num_2core_nodes = G.number_of_nodes()
     num_2core_edges = G.number_of_edges()
     if verbose:
-        logger.info('2 core info - # Nodes: %d, # Edges: %d', 
+        logger.info('2 core info - # Nodes: %d, # Edges: %d',
             num_2core_nodes, num_2core_edges)
-        logger.info('2 core removed %d nodes and %d edges', 
+        logger.info('2 core removed %d nodes and %d edges',
             num_nodes - num_2core_nodes, num_edges - num_2core_edges)
     return G
 

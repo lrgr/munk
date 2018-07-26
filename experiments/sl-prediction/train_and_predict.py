@@ -10,7 +10,7 @@ from copy import deepcopy
 
 # Load our modules
 from constants import *
-from handl.io import get_logger
+from munk.io import get_logger
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser()
@@ -90,9 +90,9 @@ def f1(p, r):
         return 0.
     else:
         return 2.0 * p * r / (p + r)
-    
+
 def max_f1_score(_y_true, _y_hat):
-    ''' 
+    '''
     Returns maximum F1 score from given list of predicted and ground truth values
     '''
     ps, rs, _ = precision_recall_curve(_y_true, _y_hat)
@@ -143,7 +143,7 @@ def data_producer(random_state, train_mode=BOTH):
 
     elif args.hold_out == GENES:
         indices = kf_genes(A_pairs, B_pairs, args.n_folds, random_state=random_state, shuffle=True)
-        
+
     for i, ((A_train_index, A_test_index), (B_train_index, B_test_index)) in enumerate(indices):
         if train_mode == BOTH:
             A_data = train_test_data(A_train_index, A_test_index, X_A, y_A, A_pairs)
@@ -166,7 +166,7 @@ def train_and_predict(fold, _A_data, _B_data, _random_state, train_mode=BOTH):
     # unpack data...
     _X_A_train, _X_A_test, _y_A_train, _y_A_test, _A_pairs_train, _A_pairs_test = _A_data
     _X_B_train, _X_B_test, _y_B_train, _y_B_test, _B_pairs_train, _B_pairs_test = _B_data
-    
+
 
     if train_mode == BOTH:
         # concatenate
@@ -185,8 +185,8 @@ def train_and_predict(fold, _A_data, _B_data, _random_state, train_mode=BOTH):
         rf = RandomForestClassifier(n_estimators=args.n_trees, max_depth=args.max_depth,
                                      random_state=_random_state,
                                      n_jobs=args.n_jobs)
-        
-        clf = GridSearchCV(rf, dict(n_estimators=args.n_trees), cv=inner_cv, 
+
+        clf = GridSearchCV(rf, dict(n_estimators=args.n_trees), cv=inner_cv,
                            n_jobs=args.n_jobs, pre_dispatch=args.n_jobs,
                            refit=True, scoring='average_precision')
         clf.fit(_X_train, _y_train)
@@ -195,12 +195,12 @@ def train_and_predict(fold, _A_data, _B_data, _random_state, train_mode=BOTH):
         # Make out-of-sample predictions
         y_A_test_hat = clf.predict_proba(_X_A_test)[:, 1]
         y_B_test_hat = clf.predict_proba(_X_B_test)[:, 1]
-        
+
     # SVM
     elif args.classifier == 'svm':
         # Train the Linear SVM
         svc = LinearSVC(tol=args.svm_tolerance, random_state=_random_state+1)
-        clf = GridSearchCV(svc, dict(C=args.svm_Cs), cv=inner_cv, 
+        clf = GridSearchCV(svc, dict(C=args.svm_Cs), cv=inner_cv,
                            n_jobs=args.n_jobs, pre_dispatch=args.n_jobs,
                            refit=True, scoring='average_precision')
         clf.fit(_X_train, _y_train)
@@ -212,7 +212,7 @@ def train_and_predict(fold, _A_data, _B_data, _random_state, train_mode=BOTH):
         y_B_test_hat = clf.decision_function(_X_B_test)
     else:
         raise NotImplementedError('Classifier "%s" not implemented.' % args.classifier)
-        
+
     # Report the results
     result = {
         "Source": {
@@ -236,7 +236,7 @@ def train_and_predict(fold, _A_data, _B_data, _random_state, train_mode=BOTH):
     logger.info('- Fold: {} ({})'.format(fold, str(best_params)))
     logger.info('\t- {0}->{1}: {2}'.format(TRAIN_NAME, A_name, format_result(result['Source'])))
     logger.info('\t- {0}->{1}: {2}'.format(TRAIN_NAME, B_name, format_result(result['Target'])))
-    
+
     return result, None #(clf, _pairs_test, _y_test, y_test_hat, B_pairs, y_B, y_B_hat)
 
 # Train on A, predict on held-out A and B, executing in parallel
@@ -264,7 +264,7 @@ average_result['Test size'] = 'N/A'
 for s_name in ['Source', 'Target']:
     for measure in ['AUPRC', 'AUROC', 'F1']:
         average_result[s_name][measure] = np.mean([ r[s_name][measure] for r in results ])
-        
+
 results.append(average_result)
 
 logger.info('- Average')
@@ -286,7 +286,7 @@ for r in results:
             "Test size": r[ty]['Test size'],
             "Best params": r['Best params']
         })
-    
+
 # Output results to file
 df = pd.DataFrame(flat_results)[['Train', 'Test', 'Fold', 'F1', 'AUROC', 'AUPRC', 'Train size', 'Test size', 'Best params']]
 df = df.sort_values(['Train', 'Test', 'Fold'])

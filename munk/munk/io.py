@@ -3,7 +3,7 @@ import logging
 '''
 Convenient logging.
 
-HANDL package exposes a `get_logger()` to allow users to convieniently
+MUNK package exposes a `get_logger()` to allow users to convieniently
 log and print with pre-formated logging statements.
 '''
 

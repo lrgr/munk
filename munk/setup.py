@@ -6,14 +6,14 @@ from os import path
 import sys
 
 if sys.version_info.major != 3:
-        raise RuntimeError('HANDL requires Python 3')
+        raise RuntimeError('MUNK requires Python 3')
 
 setup(
     name='handl',
     version='0.0',
 
-    description='HANDL: Homology Assessment using Diffusion and Landmarks',
-    url='https://github.com/lrgr/handl',
+    description='MUNK: MUlti-species Network Kernel,
+    url='https://github.com/lrgr/munk',
     author='Leiserson Research Group',
 
     classifiers=[
@@ -22,7 +22,7 @@ setup(
         'Programming Language :: Python :: 3',
     ],
     keywords='bioinformatics',
-    packages=['handl'],
+    packages=['munk'],
     install_requires=[
         'numpy>=1.14.0,<2.0.0',
         'scipy>=0.19.1,<1.0.0',

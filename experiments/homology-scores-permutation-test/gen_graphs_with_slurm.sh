@@ -1,4 +1,4 @@
-source activate HANDL
+source activate munk
 snakemake \
     --configfile $1 \
     --latency-wait 60 \
