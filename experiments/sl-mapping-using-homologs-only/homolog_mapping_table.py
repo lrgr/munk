@@ -14,7 +14,7 @@ import pandas as pd
 from sklearn.metrics import precision_score, recall_score, f1_score
 
 # Load our modules
-from handl.io import get_logger
+from munk.io import get_logger
 from homolog_mapping_predictor import predict_sl_from_homolog_mapping as predict
 from homolog_mapping_predictor import (
     load_homolog_mapping_file, 

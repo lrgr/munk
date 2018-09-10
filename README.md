@@ -1,29 +1,29 @@
-# Homology Assessment across Networks using Diffusion and Landmarks (HANDL)
+# MUlti-species Network Kernel (MUNK)
 
-[![Build Status](https://travis-ci.org/lrgr/HANDL.svg?branch=master)](https://travis-ci.org/lrgr/HANDL)
-[![GitHub license](https://img.shields.io/github/license/lrgr/HANDL.svg)](https://github.com/lrgr/HANDL/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/lrgr/munk.svg?branch=master)](https://travis-ci.org/lrgr/munk)
+[![GitHub license](https://img.shields.io/github/license/lrgr/munk.svg)](https://github.com/lrgr/munk/blob/master/LICENSE)
 
-## HANDL
+## MUNK
 
-HANDL is an algorithm for embedding protein from a target network (e.g. mouse) into a source network (e.g. from human). The HANDL algorithm was developed by Mark Crovella (Boston University), Benjamin Hescott (Northeastern University), and Max Leiserson (University of Maryland, College Park), and their respective research groups.
+MUNK is an algorithm for embedding protein from a target network (e.g. mouse) into a source network (e.g. from human), thus creating unified, cross-species protein representations. The MUNK algorithm was developed by Mark Crovella (Boston University), Benjamin Hescott (Northeastern University), and Max Leiserson (University of Maryland, College Park), and their respective research groups.
 
-![HANDL method](notebooks/figures/handl-methods.png)
+![MUNK method](notebooks/figures/munk-methods.png)
 
 ## Setup
 
-#### Install HANDL and other dependencies required to run experiments using Conda
+#### Install MUNK and other dependencies required to run experiments using Conda
 
-We recommend users to install HANDL, along with other dependencies, into a python environment using [Conda](https://conda.io/miniconda.html). To install Python and other dependencies, which you can do directly using the provided `environment.yml file`:
+We recommend users to install MUNK, along with other dependencies, into a Python environment using [Conda](https://conda.io/miniconda.html). To install Python and other dependencies, which you can do directly using the provided `environment.yml file`:
 
     conda env create -f environment.yml
-    source activate HANDL
+    source activate munk
 
-This `HADNL` Conda environment can be used to run any number of experiments and examples included in this project/repository. We note that experiments and data download for other parts of this project are implemented and configured with [Snakemake](http://snakemake.readthedocs.io/en/stable/) which will be installed as part of the `HANDL` environment.
+This `munk` Conda environment can be used to run any number of experiments and examples included in this project/repository. We note that experiments and data download for other parts of this project are implemented and configured with [Snakemake](http://snakemake.readthedocs.io/en/stable/) which will be installed as part of the `munk` environment.
 
-#### Install HANDL using PIP as a standalone python package
-Alternatively, if you would like to install HANDL as a standalone python package, you can install and build HANDL using PIP with the provided install script. Simply execute:
+#### Install MUNK using PIP as a standalone python package
+Alternatively, if you would like to install `munk` as a standalone python package, you can install and build `munk` using `pip` with the provided install script. Simply execute:
 
-    ./install_handl.sh
+    ./install_munk.sh
 
 ## Data
 
@@ -35,45 +35,45 @@ This data is used for experiments implemented in `experiments/` and described in
 
 ## Provided scripts
 
-#### Computing HANDL embeddings with: compute_embeddings.py
-We provide a script, `compute_embeddings.py`, in the `scripts/` directory to allow users to easily compute HANDL embeddings and HANDL homology scores for nodes in and across PPI networks.
+#### Computing MUNK embeddings with: compute_embeddings.py
+We provide a script, `compute_embeddings.py`, in the `scripts/` directory to allow users to easily compute MUNK representations and MUNK similarity scores for nodes in and across PPI networks.
 
 `compute_embeddings.py` takes the following arguments:
 
 * `-se`, `--source_edgelist`: path to source species PPI edgelist
-* `-te`, `--target_edgelist`: path to target species PPI edgelist 
+* `-te`, `--target_edgelist`: path to target species PPI edgelist
 * `-hf`, `--homolog_list`: path to list of homologs (a two column, tab separated list of homolog genes found in respective PPIs, with source genes in the first column and target genes in the second column)
-*  `n`, `--n_landmarks`: number of landmarks to use for HANDL embeddings
-* `-so`, `--source_output-file`: path to save source species HANDL embeddings
-* `-to`, `--target_output-file`: path to save target species HANDL embeddings
-* `-sim`, `--sim_scores_output_file`: path to save HANDL homology scores
-* `-lo`, `--landmarks_output_file`: path to save list of landmarks used for HANDL embeddings
-* `-r`, `--runtimes-file`:  path to save runtime statistics for HANDL
+*  `n`, `--n_landmarks`: number of landmarks to use for MUNK embeddings
+* `-so`, `--source_output-file`: path to save source species MUNK embeddings
+* `-to`, `--target_output-file`: path to save target species MUNK embeddings
+* `-sim`, `--sim_scores_output_file`: path to save MUNK similarity scores
+* `-lo`, `--landmarks_output_file`: path to save list of landmarks used for MUNK embeddings
+* `-r`, `--runtimes-file`:  path to save runtime statistics for MUNK
 * `--src_lam`: value of $\lambda$ to use for source species regularized Laplacian (optional, defaults to 0.05)
-* `--tgt_lam`, value of $\lambda$ Lambda to use for source species regularized Laplacian (optional, defaults to 0.05)
+* `--tgt_lam`, value of $\lambda$ to use for target species regularized Laplacian (optional, defaults to 0.05)
 
-`compute_embeddings.py` will save computed HANDL embeddings, HANDL homology scores, as well as other diagnostic information to specified file paths. Please see `experiments/HANDL-embeddings-and-scores/` for  a simple example that uses of `compute_embeddings.py` (with Snakemake).
+`compute_embeddings.py` will save computed MUNK embeddings, MUNK similarity scores, as well as other diagnostic information to specified file paths. Please see `experiments/MUNK-embeddings-and-scores/` for  a simple example that uses of `compute_embeddings.py` (with Snakemake).
 
 ## Jupyter Notebooks
 
-We also provide a Jupyter notebook, in the `notebooks/` directory to illustrate key concepts of the HANDL algorithm:
+We also provide a Jupyter notebook, in the `notebooks/` directory to illustrate key concepts of the MUNK algorithm:
 
-* `HANDL-Demo.ipynb` is a notebook that illustrates the key concepts of HANDL and demonstrates how HANDL is implemented
+* `MUNK-Demo.ipynb` is a notebook that illustrates the key concepts of MUNK and demonstrates how MUNK is implemented
 
 ## Experiments
 
-For the purpose of reproducibility,  we include source code for experiments described in [1] in the `experiments/` directory. Please refer to the README.md found in each experiments directory for more details. 
+For the purpose of reproducibility,  we include source code for experiments described in [1] in the `experiments/` directory. Please refer to the README.md found in each experiments directory for more details.
 
 A summary of what can be found in each directory is as as follows (we again note that each experiment is configured with Snakemake):
-* `HANDL-embeddings-and-scores` - An example usage and configuration of `scripts/compute_embeddings.py` using Snakemake
+* `embeddings-and-scores` - An example usage and configuration of `scripts/compute_embeddings.py` using Snakemake
 * `sl-mapping-using-homologs-only` - Synthetic lethal interaction prediction baseline using homologs. (See section 2.5 in [1] for more details)
 * `resnik-and-dissim-plots` - Scripts to generate Figures 2a and 2b as well as figures in Section S5 in the Supplemental Infromation in [1]. (See section 2.3 in [1] for more details)
-* `handl-homology-scores-permutation-test` - Scripts to run the permutation test described in Section 2.3 in [1]. This experiment shows that HANDL captures shared biological (and topological) information in PPI networks beyond just node degree.
+* `homology-scores-permutation-test` - Scripts to run the permutation test described in Section 2.3 in [1]. This experiment shows that MUNK captures shared biological (and topological) information in PPI networks beyond just node degree.
 * `sl-prediction` -Scripts to train classifiers to predict synthetic lethal interactions across species. (See section 2.5 in [1] for more details)
 
 ## Acknowledgements
 
-This work was supported in part by NSF grants IIS-1421759 and CNS-1618207 (to M.C.) and by a grant from the Boston University Undergraduate Research Opportunities Program (to T.L.). We thank Simon Kasif, Evimaria Terzi, Prakash Ishwar, Lenore Cowen, Donna Slonim, and the Tufts BCB group for helpful discussion on this work. 
+This work was supported in part by NSF grants IIS-1421759 and CNS-1618207 (to M.C.) and by a grant from the Boston University Undergraduate Research Opportunities Program (to T.L.). We thank Simon Kasif, Evimaria Terzi, Prakash Ishwar, Lenore Cowen, Donna Slonim, and the Tufts BCB group for helpful discussion on this work.
 
 We would also like to acknowledge the following open source projects/tools:
 

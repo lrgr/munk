@@ -13,8 +13,8 @@ from sklearn.metrics import precision_score, recall_score
 import random
 import networkx as nx
 
-import handl
-from handl.io import get_logger
+import munk
+from munk.io import get_logger
 
 
 ################################################################################
@@ -34,7 +34,7 @@ def load_genetic_interactions_table(gi_table_file, ppi_file,  sample_negs=False)
     if sample_negs:
         assert(len(GI) == len(SL))
 
-        nodes = set(handl.util.simple_two_core(nx.read_edgelist(ppi_file)).nodes())
+        nodes = set(munk.util.simple_two_core(nx.read_edgelist(ppi_file)).nodes())
         non_sl_pairs = set()
         non_gi_data = []
         while len(non_sl_pairs) != len(pairs):
@@ -53,7 +53,7 @@ def load_genetic_interactions_table(gi_table_file, ppi_file,  sample_negs=False)
 
 # Load a homolog mapping
 def load_homolog_mapping_file(homolog_mapping_file):
-    homologs = set(handl.util.read_homolog_list(homolog_mapping_file))
+    homologs = set(munk.util.read_homolog_list(homolog_mapping_file))
     geneAToHomologs = defaultdict(set)
     geneBToHomologs = defaultdict(set)
     for a_gene, b_gene in homologs:

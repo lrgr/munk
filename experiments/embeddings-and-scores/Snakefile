@@ -3,30 +3,30 @@ SPECIES_A, SPECIES_B = config['species-A'], config['species-B']
 A_B_OUTPUT_DIR = 'output/{}-to-{}'.format(SPECIES_A, SPECIES_B)
 B_A_OUTPUT_DIR = 'output/{}-to-{}'.format(SPECIES_B, SPECIES_A)
 
-HANDL = '../../scripts/compute_embeddings.py'
+MUNK = '../../scripts/compute_embeddings.py'
 
 # A to B embeddings and outputs
-A_B_source_embedding = '{}/{}-to-{}_{}-HANDL-embedding.pkl'.format(
+A_B_source_embedding = '{}/{}-to-{}_{}-MUNK-embedding.pkl'.format(
     A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B, SPECIES_A),
-A_B_target_embedding = '{}/{}-to-{}_{}-HANDL-embedding.pkl'.format(
+A_B_target_embedding = '{}/{}-to-{}_{}-MUNK-embedding.pkl'.format(
     A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B, SPECIES_B),
-A_B_sim_scores = '{}/{}-to-{}-HANDL-similarity-scores.pkl'.format(
+A_B_sim_scores = '{}/{}-to-{}-MUNK-similarity-scores.pkl'.format(
     A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B),
-A_B_landmark_list = '{}/{}-to-{}-HANDL-landmarks.tsv'.format(
+A_B_landmark_list = '{}/{}-to-{}-MUNK-landmarks.tsv'.format(
     A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B)
 A_B_runtimes = '{}/{}-to-{}-runtimes.json'.format(
     A_B_OUTPUT_DIR, SPECIES_A, SPECIES_B)
 
 # B to A embeddings and outputs
-B_A_source_embedding = '{}/{}-to-{}_{}-HANDL-embedding.pkl'.format(
+B_A_source_embedding = '{}/{}-to-{}_{}-MUNK-embedding.pkl'.format(
     B_A_OUTPUT_DIR, SPECIES_B, SPECIES_A, SPECIES_B),
-B_A_target_embedding = '{}/{}-to-{}_{}-HANDL-embedding.pkl'.format(
+B_A_target_embedding = '{}/{}-to-{}_{}-MUNK-embedding.pkl'.format(
     B_A_OUTPUT_DIR, SPECIES_B, SPECIES_A, SPECIES_A),
-B_A_sim_scores = '{}/{}-to-{}-HANDL-similarity-scores.pkl'.format(
+B_A_sim_scores = '{}/{}-to-{}-MUNK-similarity-scores.pkl'.format(
     B_A_OUTPUT_DIR, SPECIES_B, SPECIES_A),
-B_A_landmark_list = '{}/{}-to-{}-HANDL-landmarks.tsv'.format(
+B_A_landmark_list = '{}/{}-to-{}-MUNK-landmarks.tsv'.format(
     B_A_OUTPUT_DIR, SPECIES_B, SPECIES_A)
-B_A_runtimes = '{}/{}-to-{}-HANDL-runtimes.json'.format(
+B_A_runtimes = '{}/{}-to-{}-MUNK-runtimes.json'.format(
     B_A_OUTPUT_DIR, SPECIES_B, SPECIES_A)
 
 
@@ -43,7 +43,7 @@ rule all:
          B_A_sim_scores,
          B_A_landmark_list,
          B_A_runtimes,
-    
+
 rule A_B_embed:
     input:
         A_ppi = config['A-ppi'],
@@ -61,7 +61,7 @@ rule A_B_embed:
         '{}/log/A_B_embed.log'.format(A_B_OUTPUT_DIR)
     shell:
         '''
-        python {HANDL} \
+        python {MUNK} \
             --source_edgelist {input.A_ppi} \
             --target_edgelist {input.B_ppi} \
             --homolog_list {input.A_B_homologs} \
@@ -91,7 +91,7 @@ rule B_A_embed:
         '{}/log/B_A_embed.log'.format(B_A_OUTPUT_DIR)
     shell:
         '''
-        python {HANDL} \
+        python {MUNK} \
             --source_edgelist {input.B_ppi} \
             --target_edgelist {input.A_ppi} \
             --homolog_list {input.B_A_homologs} \
