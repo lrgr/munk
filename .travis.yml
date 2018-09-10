@@ -17,3 +17,6 @@ install:
 script: 
   - snakemake -s data/Snakefile -d data --configfile data/data-no-resnik.yml
   - snakemake all -s experiments/sl-prediction/Snakefile -d experiments/sl-prediction --configfile experiments/sl-prediction/configs/tiny.json
+
+notifications:
+  email: false

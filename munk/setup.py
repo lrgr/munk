@@ -9,8 +9,8 @@ if sys.version_info.major != 3:
         raise RuntimeError('MUNK requires Python 3')
 
 setup(
-    name='handl',
-    version='0.0',
+    name='munk',
+    version='0.1',
 
     description='MUNK: MUlti-species Network Kernel',
     url='https://github.com/lrgr/munk',
