@@ -61,7 +61,7 @@ rule permtest:
         json_results=results_template,
         diffs=diffs_template
     params:
-        n_landmarks = config['n_landmarks'], 
+        n_landmarks = config['n_landmarks'],
         lam = config['lambda']
     log:
         perm_test_log_template
@@ -103,4 +103,3 @@ rule rand_network:
         '''
         python {GEN_RANDOM_NETWORK} -e {input} -o {output} -nt {params.n_tries}
         '''
-        

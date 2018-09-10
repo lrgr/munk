@@ -7,9 +7,9 @@ import numpy as np
 from sklearn.externals import joblib
 from sklearn.externals.joblib import Parallel, delayed
 
-from handl import util
-from handl import regularized_laplacian, rkhs_factor
-from handl.io import get_logger
+from munk import util
+from munk import regularized_laplacian, rkhs_factor
+from munk.io import get_logger
 
 
 def parse_args():
@@ -26,9 +26,9 @@ def shuffle(arr):
     return arr_copy
 
 def get_degree_to_names(tuples):
-    ''' 
-    Returns dictionary of degrees to node names from given list of 
-    (name, deg) tuples 
+    '''
+    Returns dictionary of degrees to node names from given list of
+    (name, deg) tuples
     '''
     d = defaultdict(list)
     for  name, deg in tuples:
@@ -36,8 +36,8 @@ def get_degree_to_names(tuples):
     return d
 
 def get_degree_preserving_relabelling(new_name_dict, unlabeled_G):
-    ''' 
-    Returns name mapping given between degree to node names dictionary 
+    '''
+    Returns name mapping given between degree to node names dictionary
     and unlabeled graph G
     '''
     old_degree_dict = get_degree_to_names(unlabeled_G.degree)
@@ -48,19 +48,19 @@ def get_degree_preserving_relabelling(new_name_dict, unlabeled_G):
     return dict(mapping_tuples)
 
 def perturbed_graph(seed_graph):
-    ''' 
-    Returns random graph with approximately the same degree 
+    '''
+    Returns random graph with approximately the same degree
     distribution as given seed graph
     '''
     # Generate new graph with given degree sequence
     deg_sequence = shuffle(list(seed_graph.degree))
     new_G = nx.configuration_model(list(zip(*deg_sequence))[1])
-    
+
     # Rename graph with nodes in seed_graph with corresponding degrees
     deg2names = get_degree_to_names(deg_sequence)
     mapping = get_degree_preserving_relabelling(deg2names, new_G)
     new_G = nx.relabel_nodes(new_G, mapping)
-    
+
     # Remove self loops and parallel edges and return
     return util.simple_two_core(nx.Graph(new_G), verbose=False)
 

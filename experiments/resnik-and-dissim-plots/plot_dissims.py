@@ -10,28 +10,28 @@ import numpy as np
 from sklearn import neighbors
 from sklearn.externals import joblib
 
-import handl
+import munk
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--HANDL_scores', required=True)
+    parser.add_argument('-i', '--munk_scores', required=True)
     parser.add_argument('-o', '--output', required=True)
     parser.add_argument('-xm', '--xmax', type=float, required=False, default=0.6)
     parser.add_argument('-lw', '--line_width', type=float, required=False, default=2)
     parser.add_argument('-fs', '--font_size', type=float, required=False, default=12)
     return parser.parse_args()
-    
+
 
 def plot_and_save(scores_and_labels, xlabel, output,
-                  xmin=0.0, 
-                  xmax=0.6, 
-                  smoothness=20., 
-                  font_size=12, 
+                  xmin=0.0,
+                  xmax=0.6,
+                  smoothness=20.,
+                  font_size=12,
                   line_width=2):
-    
+
     # create and save plot
     plt.figure()
-    
+
     # create kernel density estimator
     kde = neighbors.KernelDensity(kernel='gaussian', bandwidth = xmax / smoothness)
     # need to add another dimension as required by sklearn
@@ -51,25 +51,25 @@ def plot_and_save(scores_and_labels, xlabel, output,
     plt.savefig(output)
 
 def main(args):
-    HANDL_data = joblib.load(args.HANDL_scores)
-    homologs = HANDL_data['homologs']
-    landmarks = HANDL_data['landmarks']
-    A_nodes = HANDL_data['A_nodes']
-    B_nodes = HANDL_data['B_nodes']
-    sim_scores = HANDL_data['X']
+    munk_data = joblib.load(args.munk_scores)
+    homologs = munk_data['homologs']
+    landmarks = munk_data['landmarks']
+    A_nodes = munk_data['A_nodes']
+    B_nodes = munk_data['B_nodes']
+    sim_scores = munk_data['X']
 
     A_n2i = dict((n, i) for i, n in enumerate(A_nodes))
     B_n2i = dict((n, i) for i, n in enumerate(B_nodes))
 
     landmark_idxs = [(A_n2i[a], B_n2i[b]) for a, b in landmarks]
     homolog_idxs = [(A_n2i[a], B_n2i[b]) for a, b in homologs]
-    
+
     dissims = 1. / sim_scores
     dissims /= np.mean(dissims)
 
     # Separate homolog, and other pairs from landmark pairs.
     _, _, _, hom_dissims, other_dissims = \
-        handl.separate_scores(dissims, landmark_idxs, homolog_idxs)
+        munk.separate_scores(dissims, landmark_idxs, homolog_idxs)
     plots = [(hom_dissims, 'Homolog pairs'), (other_dissims, 'Other pairs')]
     plot_and_save(plots, 'Dissimilarity scores', args.output,
                  xmax=args.xmax,

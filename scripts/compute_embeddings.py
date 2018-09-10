@@ -7,8 +7,8 @@ import networkx as nx
 import numpy as np
 from sklearn.externals import joblib
 
-import handl
-import handl.util as util
+import munk
+import munk.util as util
 
 ###############################################################################
 # Arguments
@@ -36,10 +36,10 @@ def parse_args():
 
 def main(args):
     '''
-    Compute HANDL embeddings given target and species edgelists and list of
+    Compute MUNK embeddings given target and species edgelists and list of
     homologs.
     '''
-    log = handl.io.get_logger()
+    log = munk.io.get_logger()
     random.seed(args.random_seed)
 
     log.info('Loading homologs list from %s', args.homolog_list)
@@ -50,7 +50,7 @@ def main(args):
     log.info('Loading target edgelist from %s', args.target_edgelist)
     target_G = nx.read_edgelist(args.target_edgelist, encoding='ascii')
 
-    log.info('Computing HANDL embeddings with %d landmarks', args.n_landmarks)
+    log.info('Computing MUNK embeddings with %d landmarks', args.n_landmarks)
     n_landmarks = args.n_landmarks
 
     source_G = util.simple_two_core(source_G)
@@ -59,7 +59,7 @@ def main(args):
 
     t_start = time.time()
     source_data, target_data, landmarks, runtimes = \
-        handl.embed_networks(source_G, target_G, homologs, n_landmarks, 
+        munk.embed_networks(source_G, target_G, homologs, n_landmarks,
                              src_lam=args.src_lam, tgt_lam=args.tgt_lam)
     t_end = time.time()
     total_time = t_end - t_start
@@ -69,17 +69,17 @@ def main(args):
     target_landmarks = [ l[1] for l in landmarks ]
 
     log.info('Saving source species embeddings to %s', args.source_output_file)
-    handl.save_embeddings(source_X, source_nodes, source_landmarks, args.source_output_file)
+    munk.save_embeddings(source_X, source_nodes, source_landmarks, args.source_output_file)
     log.info('Saving target species embeddings to %s', args.target_output_file)
-    handl.save_embeddings(target_X, target_nodes, target_landmarks, args.target_output_file)
+    munk.save_embeddings(target_X, target_nodes, target_landmarks, args.target_output_file)
 
     log.info('Source data shape {}'.format(source_X.shape))
     log.info('Target data shape {}'.format(target_X.shape))
-    
-    log.info('Saving HANDL similarity scores to %s', args.sim_scores_output_file)
-    
-    handl_homology_scores = np.dot(source_X, target_X.T)
-    joblib.dump(dict(X=handl_homology_scores, A_nodes=source_nodes, 
+
+    log.info('Saving MUNK similarity scores to %s', args.sim_scores_output_file)
+
+    munk_scores = np.dot(source_X, target_X.T)
+    joblib.dump(dict(X=munk_scores, A_nodes=source_nodes,
                      B_nodes=target_nodes, landmarks=landmarks,
                      homologs=homologs),
                 args.sim_scores_output_file)
@@ -88,7 +88,7 @@ def main(args):
 
     with open(args.landmarks_output_file, 'w') as OUT:
         for a, b in landmarks:
-            OUT.write('%s\t%s\n' % (a, b)) 
+            OUT.write('%s\t%s\n' % (a, b))
 
     log.info('Saving runtimes to %s', args.runtimes_file)
     with open(args.runtimes_file, 'w') as OUT:
@@ -97,7 +97,7 @@ def main(args):
                        runtimes=runtimes,
                        total_time=total_time), OUT, indent=2)
 
-    log.info('HANDL embedding complete!')
+    log.info('MUNK embedding complete!')
 
 if __name__ == '__main__':
     main(parse_args())

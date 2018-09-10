@@ -1,4 +1,4 @@
-name: HANDL
+name: munk
 
 channels:
   - conda-forge
@@ -17,4 +17,4 @@ dependencies:
   - jupyter
   - unzip
   - pip:
-    - ./handl
+    - ./munk

@@ -26,11 +26,11 @@ FEATURES_DIR = join(OUTPUT_DIR, 'features')
 LOG_DIR = join(OUTPUT_DIR, 'log')
 
 # Files
-HANDL = '../../scripts/compute_embeddings.py'
+MUNK = '../../scripts/compute_embeddings.py'
 FEATURIZE = 'featurize_sls.py'
 TRAIN_AND_PREDICT = 'train_and_predict.py'
 
-EMBEDDING_FORMAT_STR = '%s/{name}-HANDL-embedding.pkl' % (EMBEDDINGS_DIR)
+EMBEDDING_FORMAT_STR = '%s/{name}-MUNK-embedding.pkl' % (EMBEDDINGS_DIR)
 SRC_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=SRC_SPECIES)
 TGT_EMBEDDING = EMBEDDING_FORMAT_STR.format(name=TGT_SPECIES)
 
@@ -38,9 +38,9 @@ FEATURE_FORMAT_STR = '%s/{name}-features-{landmarks}.pkl' % FEATURES_DIR
 SRC_FEATURES = FEATURE_FORMAT_STR.format(name=SRC_SPECIES, landmarks='{landmarks}')
 TGT_FEATURES = FEATURE_FORMAT_STR.format(name=TGT_SPECIES, landmarks='{landmarks}')
 
-SIM_SCORES = '{}/{}-HANDL-similarity-scores.pkl'.format(OUTPUT_DIR, RUN_NAME)
-LANDMARKS = '{}/{}-HANDL-landmarks.tsv'.format(OUTPUT_DIR, RUN_NAME)
-RUNTIMES_FILE = '{}/{}-HANDL-runtimes.tsv'.format(OUTPUT_DIR, RUN_NAME)
+SIM_SCORES = '{}/{}-MUNK-similarity-scores.pkl'.format(OUTPUT_DIR, RUN_NAME)
+LANDMARKS = '{}/{}-MUNK-landmarks.tsv'.format(OUTPUT_DIR, RUN_NAME)
+RUNTIMES_FILE = '{}/{}-MUNK-runtimes.tsv'.format(OUTPUT_DIR, RUN_NAME)
 PREDICTION_SUMMARY_FMT = join(OUTPUT_DIR, '{}-prediction-summary-{{hold_out}}-{{landmarks}}-tr_on_{{train_data}}.tsv'.format(RUN_NAME))
 PREDICTION_DATA_FMT = join(OUTPUT_DIR, '{}-prediction-data-{{hold_out}}-{{landmarks}}.pkl'.format(RUN_NAME))
 
@@ -50,11 +50,11 @@ PREDICTION_DATA_FMT = join(OUTPUT_DIR, '{}-prediction-data-{{hold_out}}-{{landma
 # General
 rule all:
     input:
-        expand(PREDICTION_SUMMARY_FMT, 
-               hold_out=config.get('hold_outs'), 
+        expand(PREDICTION_SUMMARY_FMT,
+               hold_out=config.get('hold_outs'),
                landmarks=[WITH_LANDMARKS],
                train_data=config.get('train_data', ['both', 'src', 'tgt']))
-        
+
 
 # Train and predict
 rule train_and_predict:
@@ -89,7 +89,7 @@ rule train_and_predict:
             {params.classifier} {params.n_trees} {params.max_depth} \
             {params.svm_C} {params.svm_tol}
         '''
-        
+
 # Construct features for the given SL dataset
 rule featurize:
     input:
@@ -125,7 +125,7 @@ rule embed:
         '{}/{}-embed.log'.format(LOG_DIR, RUN_NAME)
     shell:
         '''
-        python {HANDL} \
+        python {MUNK} \
             --source_edgelist {input.src_ppi} \
             --target_edgelist {input.tgt_ppi} \
             --homolog_list {input.homologs} \

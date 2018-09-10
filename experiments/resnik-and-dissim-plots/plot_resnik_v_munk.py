@@ -10,11 +10,11 @@ import numpy as np
 from sklearn import neighbors
 from sklearn.externals import joblib
 
-import handl
+import munk
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-hs', '--HANDL_scores', required=True)
+    parser.add_argument('-ms', '--munk_scores', required=True)
     parser.add_argument('-rs', '--resnik_scores', required=True)
     parser.add_argument('-o', '--output', required=True)
     parser.add_argument('-lw', '--line_width', type=float, required=False, default=2)
@@ -22,17 +22,17 @@ def parse_args():
     return parser.parse_args()
 
 def main(args):
-    HANDL_data = joblib.load(args.HANDL_scores)
-    homologs = HANDL_data['homologs']
-    landmarks = HANDL_data['landmarks']
-    A_nodes = HANDL_data['A_nodes']
-    B_nodes = HANDL_data['B_nodes']
-    HANDL_scores_raw = HANDL_data['X']
+    munk_data = joblib.load(args.munk_scores)
+    homologs = munk_data['homologs']
+    landmarks = munk_data['landmarks']
+    A_nodes = munk_data['A_nodes']
+    B_nodes = munk_data['B_nodes']
+    munk_scores_raw = munk_data['X']
 
     A_n2i = dict((n, i) for i, n in enumerate(A_nodes))
     B_n2i = dict((n, i) for i, n in enumerate(B_nodes))
 
-    # Get Resnik scores 
+    # Get Resnik scores
     resnik_data = np.load(args.resnik_scores)
     resnik_A_n2i = resnik_data['leftIndex'][()]
     resnik_B_n2i = resnik_data['rightIndex'][()]
@@ -47,8 +47,8 @@ def main(args):
     B_scored_nodes = sorted((set(B_nodes) & set(resnik_B_n2i.keys())) - B_landmarks)
 
     print('# scored pairs:', len(A_scored_nodes) * len(B_scored_nodes))
-    
-    HANDL_scores = []
+
+    munk_scores = []
     resnik_scores = []
     r_A_idxs = [resnik_A_n2i[node] for node in A_scored_nodes]
     r_B_idxs = [resnik_B_n2i[node] for node in B_scored_nodes]
@@ -58,12 +58,12 @@ def main(args):
 
     for r_A, h_A in zip(r_A_idxs, h_A_idxs):
         for r_B, h_B in zip(r_B_idxs, h_B_idxs):
-            HANDL_scores.append(HANDL_scores_raw[h_A, h_B])
+            munk_scores.append(munk_scores_raw[h_A, h_B])
             resnik_scores.append(resnik_scores_raw[r_A, r_B])
 
-    HANDL_scores = np.asarray(HANDL_scores)
+    munk_scores = np.asarray(munk_scores)
     resnik_scores = np.asarray(resnik_scores)
-    sort_idxs = np.argsort(HANDL_scores)[::-1]
+    sort_idxs = np.argsort(munk_scores)[::-1]
     n_scores = len(sort_idxs)
     rand_idxs =  np.random.permutation(n_scores)
     resnik_scores = np.take(resnik_scores, sort_idxs)
@@ -77,10 +77,10 @@ def main(args):
     n_bins = len(resnik_scores)
     print('# bins', n_bins)
     plt.figure()
-    plt.plot(np.arange(n_bins), rand_resnik_scores, 
+    plt.plot(np.arange(n_bins), rand_resnik_scores,
              label='Ranked randomly', lw = args.line_width)
     plt.plot(np.arange(n_bins), resnik_scores,
-             label='Ranked by HANDL similarity', lw=args.line_width)
+             label='Ranked by MUNK similarity', lw=args.line_width)
     plt.xlabel('Ranked pairs',size=args.font_size)
     plt.ylabel('Resnik score', size=args.font_size)
     plt.legend(loc='best', fontsize=args.font_size)

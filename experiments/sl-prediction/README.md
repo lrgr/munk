@@ -1,12 +1,12 @@
 
 
-# Synetic Lethal (SL) interaction prediction with HANDL embeddings
+# Synetic Lethal (SL) interaction classification with MUNK embeddings
 
-Implementation of experiments in section 2.5 in [1]. In this experiment, we use HANDL embeddings to predict SL interactions in two different species of yeast and show that SLs are **co-located across species**. (Please see [1] for more details.)
+Implementation of experiments in section 2.5 in [1]. In this experiment, we use MUNK embeddings to predict SL interactions in two different species of yeast and show that SLs are **co-located across species**. (Please see [1] for more details.)
 
 From [1]:
 
-> We test whether SLs are separated from non-SLs in Handl-space, and whether this separation extends across species, by training a classifier for gene pairs using Handl-embeddings as features. More specifically, we train a random forest (RF) to classify gene pairs as SLs or non-SLs within both species simultaneously, using the source embedding and the target embedded into source space. Without the Handl-embeddings, we would not be able to train a classifier for multiple species, since genes in different species would be in different vector spaces and have different dimensions. We perform 4-fold cross-validation, fixing the relative fraction of pairs from each species, and assess the degree of separation between SLs and non-SLs in Handl-space by evaluating the RF classifications with maximum F1 score (the harmonic mean of precision and recall), the area under the ROC curve (AUROC), and the area under the precision-recall curve (AUPRC). We report the average across the four folds, separating the results by species. We use a nested cross-validation strategy to choose the number of trees for the RF that maximizes the held-out AUPRC. For simplicity, all of our experiments in this section use S.c. as the source and S.p. as the target.
+> We test whether SLs are separated from non-SLs in MUNK-space, and whether this separation extends across species, by training a classifier for gene pairs using MUNK-embeddings as features. More specifically, we train a random forest (RF) to classify gene pairs as SLs or non-SLs within both species simultaneously, using the source embedding and the target embedded into source space. Without the MUNK-embeddings, we would not be able to train a classifier for multiple species, since genes in different species would be in different vector spaces and have different dimensions. We perform 4-fold cross-validation, fixing the relative fraction of pairs from each species, and assess the degree of separation between SLs and non-SLs in MUNK-space by evaluating the RF classifications with maximum F1 score (the harmonic mean of precision and recall), the area under the ROC curve (AUROC), and the area under the precision-recall curve (AUPRC). We report the average across the four folds, separating the results by species. We use a nested cross-validation strategy to choose the number of trees for the RF that maximizes the held-out AUPRC. For simplicity, all of our experiments in this section use S.c. as the source and S.p. as the target.
 
 
 ## Usage:
@@ -23,7 +23,7 @@ We provide configuration files in `configs/` that correspond to experiments and 
 
 *  `collins-roguev-rf.yml`, `collins-roguev-svm.yml`  - SL prediction using GI/SL data from Collins et. Al [2] and Roguev et. Al [3] for _S.c_ and _S.p_,  using random forests and SVMs, respectively.
 *  `biogrid.v3.4.157-rf.yml`, `biogrid.v3.4.157-svm.yml`-SL prediction using GI/SL data from BioGRID release v3.4.157 for _S.c_ and _S.p_, using random forests and SVMs, respectively. Non-SLs are sampled from pairs nodes, obtained from PPI networks, that do not have SLs.
-* `toy-rf.yml`, `toy-svm.yml`-SL prediction using synthetic data using random forests and SVMs, respectively. 
+* `toy-rf.yml`, `toy-svm.yml`-SL prediction using synthetic data using random forests and SVMs, respectively.
 Note that inconclusive GIs are excluded
 * `tiny.yml`- SL prediction using synthetic data using random forests with a single tree. Because the experiments in this directory can be time consuming, we include a configuration file to configure a run that executes quickly; this configuration can be used for sanity checking.
 
@@ -52,7 +52,7 @@ This experiment is implemented with [Snakemake](http://snakemake.readthedocs.io/
 	}
 },
 
-"n_landmarks": 400, // Number of landmarks for HANDL
+"n_landmarks": 400, // Number of landmarks for MUNK
 "dataset_name": "<name of dataset (note that this is used as a prefix for the output directory)>",
 
 
