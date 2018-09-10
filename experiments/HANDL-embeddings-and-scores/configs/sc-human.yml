@@ -1,0 +1,7 @@
+species-A: human
+species-B: sc
+A-ppi: ../../data/ppi/string-v9.1/human/ensembl-human-network.txt
+B-ppi: ../../data/ppi/biogrid/sc/sc-biogrid.v3.4.157-ppi.tsv
+A-to-B-homologs: ../../data/homologs/human-sc/human-sc.txt
+B-to-A-homologs: ../../data/homologs/human-sc/sc-human.txt
+n_landmarks: 400
