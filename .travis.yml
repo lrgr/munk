@@ -12,7 +12,7 @@ install:
   - conda info -a
 
   - conda env create -f environment.yml
-  - source activate HANDL
+  - source activate munk
 
 script: 
   - snakemake -s data/Snakefile -d data --configfile data/data-no-resnik.yml

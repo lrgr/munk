@@ -17,4 +17,4 @@ dependencies:
   - jupyter
   - unzip
   - pip:
-    - ./handl
+    - ./munk

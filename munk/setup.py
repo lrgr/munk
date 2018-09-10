@@ -12,7 +12,7 @@ setup(
     name='handl',
     version='0.0',
 
-    description='MUNK: MUlti-species Network Kernel,
+    description='MUNK: MUlti-species Network Kernel',
     url='https://github.com/lrgr/munk',
     author='Leiserson Research Group',
 
